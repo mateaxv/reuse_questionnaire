@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reuse Container Questionnaire</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:2rem 1rem}
+    .card{background:#fff;border-radius:16px;border:.5px solid #e0e0da;max-width:700px;width:100%;padding:2rem 2.5rem}
+    .logo{font-size:13px;font-weight:500;color:#1D9E75;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.5rem}
+    .progress-bar{height:4px;background:#e8e8e4;border-radius:2px;margin-bottom:2rem}
+    .progress-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width .3s}
+    .section-label{font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+    .badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:.75rem}
+    .badge-r{background:#E6F1FB;color:#0C447C}
+    .badge-v{background:#FAEEDA;color:#633806}
+    .q-title{font-size:18px;font-weight:500;margin-bottom:1.25rem;line-height:1.4}
+    .q-block{margin-bottom:1.5rem}
+    .block-label{display:block;font-size:14px;font-weight:600;color:#444;margin-bottom:.5rem;margin-top:.75rem}
+    .options{display:flex;flex-direction:column;gap:8px}
+    .opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:.5px solid #e0e0da;border-radius:8px;cursor:pointer;transition:background .15s,border-color .15s;font-size:14px;color:#1a1a1a;user-select:none}
+    .opt:hover{background:#f5f5f3;border-color:#c8c8c2}
+    .opt.sel{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+    .opt.sel-r{background:#E6F1FB;border-color:#185FA5;color:#0C447C}
+    .opt.sel-v{background:#FAEEDA;border-color:#BA7517;color:#633806}
+    .opt input[type=radio],.opt input[type=checkbox]{accent-color:#1D9E75;flex-shrink:0;margin-top:3px}
+    .other-input{display:block;margin-top:6px;width:100%;padding:6px 10px;font-size:13px;border:.5px solid #e0e0da;border-radius:6px;background:#fff;font-family:inherit;color:#1a1a1a}
+    .other-input:focus{outline:none;border-color:#1D9E75}
+    .scale-row{display:flex;gap:8px}
+    .scale-btn{flex:1;padding:8px 4px;border:.5px solid #e0e0da;border-radius:8px;cursor:pointer;text-align:center;font-size:13px;color:#666;background:none;font-family:inherit;transition:background .15s,border-color .15s}
+    .scale-btn:hover{background:#f5f5f3}
+    .scale-btn.sel{background:#E1F5EE;border-color:#1D9E75;color:#085041;font-weight:500}
+    .scale-labels{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:4px}
+    input[type=text]{width:100%;padding:10px 12px;font-size:14px;border:.5px solid #e0e0da;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit}
+    input[type=text]:focus{outline:none;border-color:#1D9E75}
+    textarea{width:100%;padding:10px 12px;font-size:14px;border:.5px solid #e0e0da;border-radius:8px;background:#fff;color:#1a1a1a;resize:vertical;min-height:80px;font-family:inherit}
+    textarea:focus{outline:none;border-color:#1D9E75}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem}
+    .btn{padding:9px 22px;border:.5px solid #c8c8c2;border-radius:8px;cursor:pointer;font-size:14px;background:none;color:#1a1a1a;font-family:inherit}
+    .btn:hover{background:#f5f5f3}
+    .btn.primary{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:500}
+    .btn.primary:hover{background:#0F6E56}
+    .step-count{font-size:13px;color:#888}
+    .err{font-size:13px;color:#A32D2D;margin-top:.4rem;display:none}
+    .err.on{display:block}
+    .options.inv .opt:not(.sel):not(.sel-r):not(.sel-v){border-color:#F09595}
+    .scale-row.inv .scale-btn{border-color:#F09595}
+    .thank-you{text-align:center;padding:2rem 0}
+    .check-circle{width:56px;height:56px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+    .thank-you h2{font-size:20px;font-weight:500;margin-bottom:.5rem}
+    .thank-you p{font-size:14px;color:#666;max-width:380px;margin:0 auto}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Reuse Container Research</div>
+  <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+  <div id="steps">
+
+  <!-- ══════════════════════════════════════
+       SHARED BASE STEPS
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="demographics">
+    <div class="section-label">Step 1 — About you</div>
+    <div class="q-title">A few quick questions to help us interpret the results.</div>
+    <div class="q-block">
+      <span class="block-label">Age range *</span>
+      <div class="options" data-key="age" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="age" value="u25"> Under 25</label>
+        <label class="opt"><input type="radio" name="age" value="25_34"> 25–34</label>
+        <label class="opt"><input type="radio" name="age" value="35_49"> 35–49</label>
+        <label class="opt"><input type="radio" name="age" value="50p"> 50 or older</label>
+        <label class="opt"><input type="radio" name="age" value="prefer_not"> Prefer not to say</label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label">In which city or town do you live? *</span>
+      <input type="text" id="city-input" placeholder="e.g. Berlin, Lyon, Munich…"/>
+      <p class="err" id="city-err">Please enter your city or town before continuing.</p>
+    </div>
+    <div class="q-block">
+      <span class="block-label">How would you describe the area where you live? *</span>
+      <div class="options" data-key="area_type" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="area_type" value="city_centre"> City centre / urban core</label>
+        <label class="opt"><input type="radio" name="area_type" value="suburb"> Suburban area</label>
+        <label class="opt"><input type="radio" name="area_type" value="small_town"> Small town</label>
+        <label class="opt"><input type="radio" name="area_type" value="rural"> Rural / countryside</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="habits" style="display:none">
+    <div class="section-label">Step 2 — Habits</div>
+    <div class="q-title">How often do you buy food or drinks to go? *</div>
+    <div class="options" data-key="frequency" data-type="radio" data-acc="g" data-req="1">
+      <label class="opt"><input type="radio" name="frequency" value="daily"> Every day</label>
+      <label class="opt"><input type="radio" name="frequency" value="several_week"> Several times a week</label>
+      <label class="opt"><input type="radio" name="frequency" value="once_week"> About once a week</label>
+      <label class="opt"><input type="radio" name="frequency" value="rarely"> Rarely or never</label>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label">Where do you usually get takeaway? <span style="font-weight:400;color:#aaa">(select all that apply)</span></span>
+      <div class="options" data-key="takeaway_loc" data-type="checkbox" data-acc="g">
+        <label class="opt"><input type="checkbox" value="city_centre"> City centre / commercial area</label>
+        <label class="opt"><input type="checkbox" value="workplace"> Near my workplace</label>
+        <label class="opt"><input type="checkbox" value="residential"> In my neighbourhood</label>
+        <label class="opt"><input type="checkbox" value="campus"> University or school campus</label>
+        <label class="opt"><input type="checkbox" value="transport"> Train station / airport</label>
+      </div>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label">How often do you see others using reusable containers at cafés or takeaway spots? *</span>
+      <div class="options" data-key="social_exposure" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="social_exposure" value="very_often"> Very often — it is common around me</label>
+        <label class="opt"><input type="radio" name="social_exposure" value="occasionally"> Occasionally — I notice it sometimes</label>
+        <label class="opt"><input type="radio" name="social_exposure" value="rarely"> Rarely — I almost never see it</label>
+        <label class="opt"><input type="radio" name="social_exposure" value="never"> Never</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="awareness" style="display:none">
+    <div class="section-label">Step 3 — Awareness</div>
+    <div class="q-title">Which of these reusable container systems have you heard of? *</div>
+    <div class="options" data-key="awareness" data-type="radio" data-acc="g" data-req="1">
+      <label class="opt"><input type="radio" name="awareness" value="recup_only"> ReCup only</label>
+      <label class="opt"><input type="radio" name="awareness" value="vytal_only"> Vytal only</label>
+      <label class="opt"><input type="radio" name="awareness" value="both"> Both ReCup and Vytal</label>
+      <label class="opt"><input type="radio" name="awareness" value="neither"> Neither — I haven't heard of either</label>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label">Do you know any other reusable container systems not listed above?</span>
+      <input type="text" id="awareness-other" placeholder="e.g. Recircle, Relevo… (leave blank if none)"/>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label">Are reusable container return points easily accessible where you live or work? *</span>
+      <div class="options" data-key="return_access" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="return_access" value="yes"> Yes, easily accessible</label>
+        <label class="opt"><input type="radio" name="return_access" value="somewhat"> Somewhat — I know of a few but they are not very convenient</label>
+        <label class="opt"><input type="radio" name="return_access" value="no"> No, there are none near me</label>
+        <label class="opt"><input type="radio" name="return_access" value="dont_know"> I don't know</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       NEITHER GENERAL BLOCK
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="neither_appeals" style="display:none">
+    <div class="section-label">Reusable containers — general</div>
+    <div class="q-title">What do you think would appeal to you about reusable container systems in general? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="neither_appeals" data-type="checkbox" data-acc="g" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"> It would help me reduce single-use waste</label>
+      <label class="opt"><input type="checkbox" value="convenient"> It would be easy and convenient to use</label>
+      <label class="opt"><input type="checkbox" value="quality"> Good container quality</label>
+      <label class="opt"><input type="checkbox" value="process"> A simple deposit / return process</label>
+      <label class="opt"><input type="checkbox" value="availability"> Available at the places I usually go</label>
+      <label class="opt"><input type="checkbox" value="price"> A fair price compared to single-use packaging</label>
+      <label class="opt"><input type="checkbox" value="social"> I would feel good using it in front of others</label>
+      <label class="opt"><input type="checkbox" value="nothing"> Nothing would appeal to me</label>
+      <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="neither-appeals-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="neither_barriers" style="display:none">
+    <div class="section-label">Reusable containers — general</div>
+    <div class="q-title">What do you think would be the biggest barriers to using a reusable container system? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="q-block">
+      <span class="block-label">Practical</span>
+      <div class="options" data-key="neither_bar_p" data-type="checkbox" data-acc="g" data-req="1">
+        <label class="opt"><input type="checkbox" value="convenience"> Single-use would still seem more convenient</label>
+        <label class="opt"><input type="checkbox" value="no_space"> No space in my bag to carry a container</label>
+        <label class="opt"><input type="checkbox" value="deposit"> Having to pay a deposit upfront</label>
+        <label class="opt"><input type="checkbox" value="complicated"> The process seems complicated</label>
+        <label class="opt"><input type="checkbox" value="not_available"> Not available at my usual places</label>
+        <label class="opt"><input type="checkbox" value="no_return_points"> Not enough return points near me</label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"> Nobody around me uses these systems</label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"> I'm not convinced it is better for the environment</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+        <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="neither-bar-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="neither_bar_h" data-type="checkbox" data-acc="g" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"> Unsure how well containers would be cleaned between uses</label>
+        <label class="opt"><input type="checkbox" value="contamination"> Risk of contamination from previous users</label>
+        <label class="opt"><input type="checkbox" value="smell"> Concern about lingering odours or stains</label>
+        <label class="opt"><input type="checkbox" value="plastics"> Concerns about plastic releasing microplastics</label>
+        <label class="opt"><input type="checkbox" value="material"> General uncertainty about container material or safety</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="neither_bridge" style="display:none">
+    <div class="section-label">Reusable containers — bridge question</div>
+    <div class="q-title">What would be the single biggest barrier to you trying a reusable container system? *</div>
+    <div class="options" data-key="neither_top" data-type="radio" data-acc="g" data-req="1">
+      <label class="opt"><input type="radio" name="neither_top" value="convenience"> Situational convenience — single-use is just easier</label>
+      <label class="opt"><input type="radio" name="neither_top" value="infrastructure"> Not enough return points or venues offering it</label>
+      <label class="opt"><input type="radio" name="neither_top" value="complexity"> The system seems too complicated</label>
+      <label class="opt"><input type="radio" name="neither_top" value="cost"> Cost or deposit concerns</label>
+      <label class="opt"><input type="radio" name="neither_top" value="hygiene"> Hygiene or material concerns</label>
+      <label class="opt"><input type="radio" name="neither_top" value="habit"> I haven't thought about it / no particular reason</label>
+      <label class="opt"><input type="radio" name="neither_top" value="social"> Social or environmental skepticism</label>
+      <label class="opt"><input type="radio" name="neither_top" value="no_barrier"> No barrier — I'd happily try it</label>
+    </div>
+  </div>
+
+  <div class="step" data-id="neither_open" style="display:none">
+    <div class="section-label">Reusable containers — open comment</div>
+    <div class="q-title">Any other thoughts on reusable container systems you'd like to share?</div>
+    <textarea id="neither-open" placeholder="Optional…" rows="4"></textarea>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       RECUP STEPS
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="recup_usage" style="display:none">
+    <div class="section-label">ReCup — Usage</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">Have you ever used ReCup? *</div>
+    <div class="options" data-key="recup_usage" data-type="radio" data-acc="r" data-req="1">
+      <label class="opt"><input type="radio" name="recup_usage" value="regular"> Yes, I use it regularly</label>
+      <label class="opt"><input type="radio" name="recup_usage" value="occasional"> Yes, I use it every now and then when I need takeaway</label>
+      <label class="opt"><input type="radio" name="recup_usage" value="stopped"> I tried it but stopped using it</label>
+      <label class="opt"><input type="radio" name="recup_usage" value="never"> No, never</label>
+    </div>
+  </div>
+
+  <!-- PATH A/B: ReCup users -->
+  <div class="step" data-id="recup_ease" style="display:none">
+    <div class="section-label">ReCup — Ease of use</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">How easy did you find the process of borrowing and returning a ReCup container? *</div>
+    <div class="q-block">
+      <div class="scale-row" id="recup-ease-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span>Very difficult</span><span>Very easy</span></div>
+      <p class="err" id="recup-ease-err">Please select a rating before continuing.</p>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_likes" style="display:none">
+    <div class="section-label">ReCup — What you like</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">What do you like or value about ReCup? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="recup_likes" data-type="checkbox" data-acc="r" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"> It helps me reduce single-use waste</label>
+      <label class="opt"><input type="checkbox" value="convenient"> It is easy and convenient to use</label>
+      <label class="opt"><input type="checkbox" value="quality"> The container quality is good</label>
+      <label class="opt"><input type="checkbox" value="process"> The deposit / return process is straightforward</label>
+      <label class="opt"><input type="checkbox" value="availability"> It is available at the places I go to</label>
+      <label class="opt"><input type="checkbox" value="price"> The price is fair compared to single-use packaging</label>
+      <label class="opt"><input type="checkbox" value="social"> I feel good using it in front of others</label>
+      <label class="opt"><input type="checkbox" value="nothing"> Nothing in particular</label>
+      <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="recup-likes-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_dislikes" style="display:none">
+    <div class="section-label">ReCup — What you don't like</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">What do you find frustrating or off-putting about ReCup? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="q-block">
+      <span class="block-label">Practical issues</span>
+      <div class="options" data-key="recup_dislikes_p" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"> Single-use is more convenient in the moment</label>
+        <label class="opt"><input type="checkbox" value="no_space"> No space in my bag to carry the container</label>
+        <label class="opt"><input type="checkbox" value="deposit_cost"> Having to pay a deposit upfront</label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"> The deposit process is complicated</label>
+        <label class="opt"><input type="checkbox" value="not_available"> Not available at my usual places</label>
+        <label class="opt"><input type="checkbox" value="system_complicated"> The overall system is too complicated</label>
+        <label class="opt"><input type="checkbox" value="deposit_low"> The deposit value is too low to motivate returning</label>
+        <label class="opt"><input type="checkbox" value="no_return_points"> Not enough return points near me</label>
+        <label class="opt"><input type="checkbox" value="waiting_times"> Waiting times at return points</label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"> Nobody around me uses it</label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"> I'm not convinced it is better for the environment</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+        <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="recup-dislikes-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="recup_dislikes_h" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"> Unsure how well it is cleaned between uses</label>
+        <label class="opt"><input type="checkbox" value="contamination"> Risk of contamination from previous users</label>
+        <label class="opt"><input type="checkbox" value="smell"> Concern about lingering odours or stains</label>
+        <label class="opt"><input type="checkbox" value="plastics"> Concerns about plastic releasing microplastics</label>
+        <label class="opt"><input type="checkbox" value="material"> General uncertainty about container material or safety</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_stopped" style="display:none">
+    <div class="section-label">ReCup — Why did you stop?</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">What specifically made you stop using ReCup? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="recup_stopped" data-type="checkbox" data-acc="r" data-req="1">
+      <label class="opt"><input type="checkbox" value="too_complicated"> The process was more complicated than expected</label>
+      <label class="opt"><input type="checkbox" value="forgot_habit"> I forgot to make it a habit</label>
+      <label class="opt"><input type="checkbox" value="return_hassle"> Returning the container was too much hassle</label>
+      <label class="opt"><input type="checkbox" value="not_worth"> It didn't feel worth the effort</label>
+      <label class="opt"><input type="checkbox" value="not_available"> It stopped being available at my usual place</label>
+      <label class="opt"><input type="checkbox" value="hygiene"> I had hygiene or quality concerns after using it</label>
+      <label class="opt"><input type="checkbox" value="social_awkward"> I felt uncomfortable or awkward using it</label>
+      <label class="opt"><input type="checkbox" value="other"> Other reason</label>
+    </div>
+  </div>
+
+  <!-- PATH C: ReCup never-users -->
+  <div class="step" data-id="recup_appeals" style="display:none">
+    <div class="section-label">ReCup — What would appeal to you</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">What do you think would appeal to you about ReCup, if you tried it? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="recup_appeals" data-type="checkbox" data-acc="r" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"> It would help me reduce single-use waste</label>
+      <label class="opt"><input type="checkbox" value="convenient"> It would be easy and convenient to use</label>
+      <label class="opt"><input type="checkbox" value="quality"> The container quality looks good</label>
+      <label class="opt"><input type="checkbox" value="process"> The deposit / return process seems straightforward</label>
+      <label class="opt"><input type="checkbox" value="availability"> It would be available at the places I go to</label>
+      <label class="opt"><input type="checkbox" value="price"> The price seems fair compared to single-use packaging</label>
+      <label class="opt"><input type="checkbox" value="social"> I would feel good using it in front of others</label>
+      <label class="opt"><input type="checkbox" value="nothing"> Nothing would appeal to me</label>
+      <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="recup-appeals-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_barriers" style="display:none">
+    <div class="section-label">ReCup — What puts you off trying</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">What has put you off trying ReCup so far? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="q-block">
+      <span class="block-label">Practical</span>
+      <div class="options" data-key="recup_bar_p" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"> Single-use seems more convenient</label>
+        <label class="opt"><input type="checkbox" value="no_space"> No space in my bag to carry a container</label>
+        <label class="opt"><input type="checkbox" value="deposit_cost"> Having to pay a deposit upfront</label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"> The deposit process seems complicated</label>
+        <label class="opt"><input type="checkbox" value="not_available"> Not available at my usual places</label>
+        <label class="opt"><input type="checkbox" value="system_complicated"> The overall system seems too complicated</label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"> Nobody around me uses it</label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"> I'm not convinced it is better for the environment</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+        <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="recup-bar-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="recup_bar_h" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"> Unsure how well containers would be cleaned between uses</label>
+        <label class="opt"><input type="checkbox" value="contamination"> Risk of contamination from previous users</label>
+        <label class="opt"><input type="checkbox" value="smell"> Concern about lingering odours or stains</label>
+        <label class="opt"><input type="checkbox" value="plastics"> Concerns about plastic releasing microplastics</label>
+        <label class="opt"><input type="checkbox" value="material"> General uncertainty about container material or safety</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIDGE: ReCup all groups -->
+  <div class="step" data-id="recup_bridge" style="display:none">
+    <div class="section-label">ReCup — Bridge question</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">What is or has been the single biggest barrier to using ReCup more? *</div>
+    <div class="options" data-key="recup_top" data-type="radio" data-acc="r" data-req="1">
+      <label class="opt"><input type="radio" name="recup_top" value="convenience"> Situational convenience — single-use is just easier</label>
+      <label class="opt"><input type="radio" name="recup_top" value="infrastructure"> Not enough return points or venues offering it</label>
+      <label class="opt"><input type="radio" name="recup_top" value="complexity"> The system is too complicated</label>
+      <label class="opt"><input type="radio" name="recup_top" value="cost"> Cost or deposit issues</label>
+      <label class="opt"><input type="radio" name="recup_top" value="hygiene"> Hygiene or material concerns</label>
+      <label class="opt"><input type="radio" name="recup_top" value="habit"> I keep forgetting / haven't got around to it yet</label>
+      <label class="opt"><input type="radio" name="recup_top" value="social"> Social or environmental skepticism</label>
+      <label class="opt"><input type="radio" name="recup_top" value="no_barrier"> No barrier — I'm happy using it / I'd happily try it</label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_open" style="display:none">
+    <div class="section-label">ReCup — Open comment</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title">Any other thoughts about ReCup you'd like to share?</div>
+    <textarea id="recup-open" placeholder="Optional…" rows="4"></textarea>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       VYTAL STEPS
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="vytal_usage" style="display:none">
+    <div class="section-label">Vytal — Usage</div>
+    <div id="vytal-transition-note" style="display:none;background:#FAEEDA;border-radius:8px;padding:10px 14px;font-size:13px;color:#633806;margin-bottom:1rem;">
+      You've completed the ReCup section. Now a few questions about <strong>Vytal</strong>, a different reusable container system.
+    </div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">Have you ever used Vytal? *</div>
+    <div class="options" data-key="vytal_usage" data-type="radio" data-acc="v" data-req="1">
+      <label class="opt"><input type="radio" name="vytal_usage" value="regular"> Yes, I use it regularly</label>
+      <label class="opt"><input type="radio" name="vytal_usage" value="occasional"> Yes, I use it every now and then when I need takeaway</label>
+      <label class="opt"><input type="radio" name="vytal_usage" value="stopped"> I tried it but stopped using it</label>
+      <label class="opt"><input type="radio" name="vytal_usage" value="never"> No, never</label>
+    </div>
+  </div>
+
+  <!-- PATH A/B: Vytal users -->
+  <div class="step" data-id="vytal_ease" style="display:none">
+    <div class="section-label">Vytal — Ease of use</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">How easy did you find the process of borrowing and returning a Vytal container? *</div>
+    <div class="q-block">
+      <div class="scale-row" id="vytal-ease-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span>Very difficult</span><span>Very easy</span></div>
+      <p class="err" id="vytal-ease-err">Please select a rating before continuing.</p>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_likes" style="display:none">
+    <div class="section-label">Vytal — What you like</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">What do you like or value about Vytal? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="vytal_likes" data-type="checkbox" data-acc="v" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"> It helps me reduce single-use waste</label>
+      <label class="opt"><input type="checkbox" value="convenient"> It is easy and convenient to use</label>
+      <label class="opt"><input type="checkbox" value="quality"> The container quality is good</label>
+      <label class="opt"><input type="checkbox" value="process"> The deposit / return process is straightforward</label>
+      <label class="opt"><input type="checkbox" value="app"> The app makes the process easy</label>
+      <label class="opt"><input type="checkbox" value="availability"> It is available at the places I go to</label>
+      <label class="opt"><input type="checkbox" value="price"> The price is fair compared to single-use packaging</label>
+      <label class="opt"><input type="checkbox" value="social"> I feel good using it in front of others</label>
+      <label class="opt"><input type="checkbox" value="nothing"> Nothing in particular</label>
+      <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="vytal-likes-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_dislikes" style="display:none">
+    <div class="section-label">Vytal — What you don't like</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">What do you find frustrating or off-putting about Vytal? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="q-block">
+      <span class="block-label">Practical issues</span>
+      <div class="options" data-key="vytal_dislikes_p" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"> Single-use is more convenient in the moment</label>
+        <label class="opt"><input type="checkbox" value="no_space"> No space in my bag to carry the container</label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"> The deposit process is complicated</label>
+        <label class="opt"><input type="checkbox" value="app_install"> Too much effort to install and register in the app</label>
+        <label class="opt"><input type="checkbox" value="app_difficult"> The app is hard to use</label>
+        <label class="opt"><input type="checkbox" value="data_trust"> I don't trust the app with my personal data</label>
+        <label class="opt"><input type="checkbox" value="digital_literacy"> I find app-based systems generally difficult</label>
+        <label class="opt"><input type="checkbox" value="not_available"> Not available at my usual places</label>
+        <label class="opt"><input type="checkbox" value="system_complicated"> The overall system is too complicated</label>
+        <label class="opt"><input type="checkbox" value="deposit_low"> The deposit value is too low to motivate returning</label>
+        <label class="opt"><input type="checkbox" value="no_return_points"> Not enough return points near me</label>
+        <label class="opt"><input type="checkbox" value="waiting_times"> Waiting times at return points</label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"> Nobody around me uses it</label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"> I'm not convinced it is better for the environment</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+        <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="vytal-dislikes-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="vytal_dislikes_h" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"> Unsure how well it is cleaned between uses</label>
+        <label class="opt"><input type="checkbox" value="contamination"> Risk of contamination from previous users</label>
+        <label class="opt"><input type="checkbox" value="smell"> Concern about lingering odours or stains</label>
+        <label class="opt"><input type="checkbox" value="plastics"> Concerns about plastic releasing microplastics</label>
+        <label class="opt"><input type="checkbox" value="material"> General uncertainty about container material or safety</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_stopped" style="display:none">
+    <div class="section-label">Vytal — Why did you stop?</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">What specifically made you stop using Vytal? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="vytal_stopped" data-type="checkbox" data-acc="v" data-req="1">
+      <label class="opt"><input type="checkbox" value="too_complicated"> The process was more complicated than expected</label>
+      <label class="opt"><input type="checkbox" value="forgot_habit"> I forgot to make it a habit</label>
+      <label class="opt"><input type="checkbox" value="return_hassle"> Returning the container was too much hassle</label>
+      <label class="opt"><input type="checkbox" value="not_worth"> It didn't feel worth the effort</label>
+      <label class="opt"><input type="checkbox" value="not_available"> It stopped being available at my usual place</label>
+      <label class="opt"><input type="checkbox" value="hygiene"> I had hygiene or quality concerns after using it</label>
+      <label class="opt"><input type="checkbox" value="app_issues"> Problems with the app (technical, registration, data)</label>
+      <label class="opt"><input type="checkbox" value="social_awkward"> I felt uncomfortable or awkward using it</label>
+      <label class="opt"><input type="checkbox" value="other"> Other reason</label>
+    </div>
+  </div>
+
+  <!-- PATH C: Vytal never-users -->
+  <div class="step" data-id="vytal_appeals" style="display:none">
+    <div class="section-label">Vytal — What would appeal to you</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">What do you think would appeal to you about Vytal, if you tried it? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="vytal_appeals" data-type="checkbox" data-acc="v" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"> It would help me reduce single-use waste</label>
+      <label class="opt"><input type="checkbox" value="convenient"> It would be easy and convenient to use</label>
+      <label class="opt"><input type="checkbox" value="quality"> The container quality looks good</label>
+      <label class="opt"><input type="checkbox" value="process"> The deposit / return process seems straightforward</label>
+      <label class="opt"><input type="checkbox" value="app"> The app would make the process easy</label>
+      <label class="opt"><input type="checkbox" value="availability"> It would be available at the places I go to</label>
+      <label class="opt"><input type="checkbox" value="price"> The price seems fair compared to single-use packaging</label>
+      <label class="opt"><input type="checkbox" value="social"> I would feel good using it in front of others</label>
+      <label class="opt"><input type="checkbox" value="nothing"> Nothing would appeal to me</label>
+      <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="vytal-appeals-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_barriers" style="display:none">
+    <div class="section-label">Vytal — What puts you off trying</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">What has put you off trying Vytal so far? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="q-block">
+      <span class="block-label">Practical</span>
+      <div class="options" data-key="vytal_bar_p" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"> Single-use seems more convenient</label>
+        <label class="opt"><input type="checkbox" value="no_space"> No space in my bag to carry a container</label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"> The deposit process seems complicated</label>
+        <label class="opt"><input type="checkbox" value="app_install"> Too much effort to install and register in the app</label>
+        <label class="opt"><input type="checkbox" value="app_difficult"> The app seems hard to use</label>
+        <label class="opt"><input type="checkbox" value="data_trust"> I wouldn't trust the app with my personal data</label>
+        <label class="opt"><input type="checkbox" value="digital_literacy"> I find app-based systems generally difficult</label>
+        <label class="opt"><input type="checkbox" value="not_available"> Not available at my usual places</label>
+        <label class="opt"><input type="checkbox" value="system_complicated"> The overall system seems too complicated</label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"> Nobody around me uses it</label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"> I'm not convinced it is better for the environment</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+        <label class="opt"><input type="checkbox" value="other">Other:<input type="text" id="vytal-bar-other" class="other-input" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="vytal_bar_h" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"> Unsure how well containers would be cleaned between uses</label>
+        <label class="opt"><input type="checkbox" value="contamination"> Risk of contamination from previous users</label>
+        <label class="opt"><input type="checkbox" value="smell"> Concern about lingering odours or stains</label>
+        <label class="opt"><input type="checkbox" value="plastics"> Concerns about plastic releasing microplastics</label>
+        <label class="opt"><input type="checkbox" value="material"> General uncertainty about container material or safety</label>
+        <label class="opt"><input type="checkbox" value="none"> None of these</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIDGE: Vytal all groups -->
+  <div class="step" data-id="vytal_bridge" style="display:none">
+    <div class="section-label">Vytal — Bridge question</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">What is or has been the single biggest barrier to using Vytal more? *</div>
+    <div class="options" data-key="vytal_top" data-type="radio" data-acc="v" data-req="1">
+      <label class="opt"><input type="radio" name="vytal_top" value="convenience"> Situational convenience — single-use is just easier</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="infrastructure"> Not enough return points or venues offering it</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="complexity"> The system is too complicated</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="app"> The app is a barrier (registration, usability, data trust)</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="hygiene"> Hygiene or material concerns</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="habit"> I keep forgetting / haven't got around to it yet</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="social"> Social or environmental skepticism</label>
+      <label class="opt"><input type="radio" name="vytal_top" value="no_barrier"> No barrier — I'm happy using it / I'd happily try it</label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_open" style="display:none">
+    <div class="section-label">Vytal — Open comment</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title">Any other thoughts about Vytal you'd like to share?</div>
+    <textarea id="vytal-open" placeholder="Optional…" rows="4"></textarea>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SHARED END
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="motivation" style="display:none">
+    <div class="section-label">Motivation</div>
+    <div class="q-title">How motivated are you to reduce your single-use packaging waste? *</div>
+    <div class="q-block">
+      <div class="scale-row" id="mot-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span>Not at all</span><span>Extremely motivated</span></div>
+      <p class="err" id="mot-err">Please select a rating before continuing.</p>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label">How likely are you to try or use a reusable container system in the next three months? *</span>
+      <div class="scale-row" id="intent-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span>Very unlikely</span><span>Very likely</span></div>
+      <p class="err" id="intent-err">Please select a rating before continuing.</p>
+    </div>
+    <div class="q-title" style="margin-top:1.5rem">What would most increase your likelihood of using a reusable container system? * <span style="font-size:14px;font-weight:400;color:#888">(select all that apply)</span></div>
+    <div class="options" data-key="incentives" data-type="checkbox" data-acc="g" data-req="1">
+      <label class="opt"><input type="checkbox" value="discount"> A price discount when using a reusable container</label>
+      <label class="opt"><input type="checkbox" value="tax"> A tax or surcharge on single-use packaging making it more expensive</label>
+      <label class="opt"><input type="checkbox" value="wider"> More places accepting or offering it</label>
+      <label class="opt"><input type="checkbox" value="simpler"> A simpler or faster return process</label>
+      <label class="opt"><input type="checkbox" value="reminders"> Reminders or a mobile app to help me remember</label>
+      <label class="opt"><input type="checkbox" value="social"> Knowing friends or colleagues use it</label>
+      <label class="opt"><input type="checkbox" value="nothing"> Nothing — I am not interested</label>
+    </div>
+  </div>
+
+  <div class="step" data-id="open" style="display:none">
+    <div class="section-label">Open feedback</div>
+    <div class="q-title">Is there anything else that would make reusable container systems easier or more appealing?</div>
+    <textarea id="open1" placeholder="Your thoughts (optional)…" rows="4"></textarea>
+    <div class="q-title" style="margin-top:1.5rem">Any final comments or suggestions?</div>
+    <textarea id="open2" placeholder="Optional…" rows="3"></textarea>
+  </div>
+
+  </div><!-- /steps -->
+
+  <div class="nav" id="nav-bar">
+    <button class="btn" id="back-btn" onclick="go(-1)" style="visibility:hidden">Back</button>
+    <span class="step-count" id="step-count"></span>
+    <button class="btn primary" id="next-btn" onclick="go(1)">Next</button>
+  </div>
+  <p id="submit-err" style="display:none;font-size:13px;color:#A32D2D;margin-top:.75rem;text-align:center;">
+    Something went wrong — please check your connection and try again.
+  </p>
+
+  <div id="thank-you" style="display:none">
+    <div class="thank-you">
+      <div class="check-circle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Thank you for your responses!</h2>
+      <p>Your input helps improve reuse container systems for everyone.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const ans = {};
+const BASE = ['demographics','habits','awareness'];
+const END  = ['motivation','open'];
+
+const SCALES = {
+  'recup-ease-scale':'recup_ease',
+  'vytal-ease-scale':'vytal_ease',
+  'intent-scale':'adoption_intent',
+  'mot-scale':'motivation'
+};
+const SCALE_ERRS = {
+  'recup-ease-scale':'recup-ease-err',
+  'vytal-ease-scale':'vytal-ease-err',
+  'intent-scale':'intent-err',
+  'mot-scale':'mot-err'
+};
+
+function sysSteps(s) {
+  const u = ans[s+'_usage'];
+  const steps = [s+'_usage'];
+  if (u === 'regular' || u === 'occasional' || u === 'stopped') {
+    // PATH A/B: users — experience-based
+    steps.push(s+'_ease', s+'_likes', s+'_dislikes');
+    if (u === 'stopped') steps.push(s+'_stopped');
+  } else if (u === 'never') {
+    // PATH C: never-users — attitude-based
+    steps.push(s+'_appeals', s+'_barriers');
+  }
+  // Bridge: all groups
+  steps.push(s+'_bridge', s+'_open');
+  return steps;
+}
+
+function buildSeq() {
+  const aw = ans['awareness'];
+  let seq = [...BASE];
+  if      (aw === 'recup_only') seq = seq.concat(sysSteps('recup'));
+  else if (aw === 'vytal_only') seq = seq.concat(sysSteps('vytal'));
+  else if (aw === 'both')       seq = seq.concat(sysSteps('recup'), sysSteps('vytal'));
+  else if (aw === 'neither')    seq = seq.concat(['neither_appeals','neither_barriers','neither_bridge','neither_open']);
+  return seq.concat(END);
+}
+
+let seq = buildSeq(), idx = 0;
+
+function showStep(i) {
+  document.querySelectorAll('.step').forEach(s => s.style.display = 'none');
+  const stepId = seq[i];
+  const el = document.querySelector(`.step[data-id="${stepId}"]`);
+  if (el) el.style.display = 'block';
+  // Show Vytal transition note only for "Both" respondents
+  const note = document.getElementById('vytal-transition-note');
+  if (note) note.style.display = (stepId === 'vytal_usage' && ans['awareness'] === 'both') ? 'block' : 'none';
+  const pct = Math.round((i+1)/(seq.length+1)*100);
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('step-count').textContent = 'Step '+(i+1)+' of '+seq.length;
+  document.getElementById('back-btn').style.visibility = i > 0 ? 'visible' : 'hidden';
+  document.getElementById('next-btn').textContent = i === seq.length-1 ? 'Submit' : 'Next';
+}
+
+function validate() {
+  const stepId = seq[idx];
+  const el = document.querySelector(`.step[data-id="${stepId}"]`);
+  let ok = true;
+
+  if (stepId === 'demographics') {
+    const v = (ans['city']||'').trim();
+    const e = document.getElementById('city-err');
+    if (!v) { e.classList.add('on'); ok = false; } else e.classList.remove('on');
+  }
+
+  el.querySelectorAll('.options[data-req="1"]').forEach(g => {
+    const key = g.dataset.key, type = g.dataset.type;
+    const filled = type === 'radio' ? ans[key] != null : (ans[key] && ans[key].length > 0);
+    if (!filled) {
+      g.classList.add('inv');
+      let e = g.nextElementSibling;
+      if (!e || !e.classList.contains('err')) {
+        e = document.createElement('p'); e.className = 'err';
+        e.textContent = type==='radio' ? 'Please select an option before continuing.' : 'Please select at least one option before continuing.';
+        g.insertAdjacentElement('afterend', e);
+      }
+      e.classList.add('on'); ok = false;
+    } else {
+      g.classList.remove('inv');
+      const e = g.nextElementSibling;
+      if (e && e.classList.contains('err')) e.classList.remove('on');
+    }
+  });
+
+  el.querySelectorAll('.scale-row[data-req="1"]').forEach(sc => {
+    const key = SCALES[sc.id], filled = key && ans[key] != null;
+    if (!filled) {
+      sc.classList.add('inv');
+      const e = document.getElementById(SCALE_ERRS[sc.id]);
+      if (e) e.classList.add('on'); ok = false;
+    } else {
+      sc.classList.remove('inv');
+      const e = document.getElementById(SCALE_ERRS[sc.id]);
+      if (e) e.classList.remove('on');
+    }
+  });
+  return ok;
+}
+
+// ── FORMSPREE ENDPOINT ───────────────────────────────────────────
+// Replace the URL below with your own from formspree.io/f/YOUR_ID
+const FORMSPREE_URL = 'https://formspree.io/f/mojblejd';
+
+async function submitToFormspree() {
+  // Collect open text fields
+  ans['open_appeals']  = (document.getElementById('open1')?.value  || '').trim();
+  ans['open_general']  = (document.getElementById('open2')?.value  || '').trim();
+  ans['recup_open_text']  = (document.getElementById('recup-open')?.value  || '').trim();
+  ans['vytal_open_text']  = (document.getElementById('vytal-open')?.value  || '').trim();
+  ans['neither_open_text']= (document.getElementById('neither-open')?.value|| '').trim();
+
+  // Flatten arrays to comma-separated strings for Formspree
+  const payload = {};
+  for (const [k, v] of Object.entries(ans)) {
+    payload[k] = Array.isArray(v) ? v.join(', ') : (v ?? '');
+  }
+
+  const btn = document.getElementById('next-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      document.getElementById('steps').style.display = 'none';
+      document.getElementById('nav-bar').style.display = 'none';
+      document.getElementById('thank-you').style.display = 'block';
+    } else {
+      btn.textContent = 'Submit';
+      btn.disabled = false;
+      document.getElementById('submit-err').style.display = 'block';
+    }
+  } catch {
+    btn.textContent = 'Submit';
+    btn.disabled = false;
+    document.getElementById('submit-err').style.display = 'block';
+  }
+}
+
+function go(dir) {
+  if (dir===1 && !validate()) return;
+  const stepId = seq[idx];
+  if (dir===1 && (stepId==='awareness'||stepId==='recup_usage'||stepId==='vytal_usage')) {
+    seq = buildSeq();
+  }
+  idx += dir;
+  if (idx >= seq.length) {
+    // Last step — submit to Formspree instead of just showing thank-you
+    submitToFormspree();
+    return;
+  }
+  if (idx < 0) idx = 0;
+  showStep(idx);
+}
+
+showStep(0);
+
+document.querySelectorAll('.options').forEach(g => {
+  const type = g.dataset.type, key = g.dataset.key, acc = g.dataset.acc||'g';
+  if (!key) return;
+  const cls = acc==='r'?'sel-r':acc==='v'?'sel-v':'sel';
+  g.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', e => {
+      if (e.target.tagName==='INPUT'&&e.target.type==='text') return;
+      if (type==='radio') {
+        g.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel','sel-r','sel-v'));
+        opt.classList.add(cls);
+        const inp=opt.querySelector('input[type=radio]');
+        if (inp){inp.checked=true;ans[key]=inp.value;}
+      } else {
+        opt.classList.toggle(cls);
+        const inp=opt.querySelector('input[type=checkbox]');
+        if (inp) inp.checked=opt.classList.contains(cls);
+        if (!ans[key]) ans[key]=[];
+        const val=inp?inp.value:null;
+        if (opt.classList.contains(cls)){if(!ans[key].includes(val))ans[key].push(val);}
+        else ans[key]=ans[key].filter(v=>v!==val);
+      }
+    });
+  });
+});
+
+document.querySelectorAll('.scale-row').forEach(row=>{
+  const key=SCALES[row.id]; if(!key) return;
+  row.querySelectorAll('.scale-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      row.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel'); ans[key]=btn.dataset.val;
+    });
+  });
+});
+
+document.getElementById('city-input').addEventListener('input',function(){ans['city']=this.value.trim();});
+[
+  ['awareness-other',       'awareness_other'],
+  ['recup-likes-other',     'recup_likes_other'],
+  ['recup-dislikes-other',  'recup_dislikes_other'],
+  ['recup-appeals-other',   'recup_appeals_other'],
+  ['recup-bar-other',       'recup_bar_other'],
+  ['vytal-likes-other',     'vytal_likes_other'],
+  ['vytal-dislikes-other',  'vytal_dislikes_other'],
+  ['vytal-appeals-other',   'vytal_appeals_other'],
+  ['vytal-bar-other',       'vytal_bar_other'],
+  ['neither-appeals-other', 'neither_appeals_other'],
+  ['neither-bar-other',     'neither_bar_other'],
+].forEach(([id,key])=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',function(){ans[key]=this.value.trim();});
+});
+</script>
+</body>
+</html>
