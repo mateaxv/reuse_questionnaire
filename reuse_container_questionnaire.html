@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reuse Container Questionnaire</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:2rem 1rem}
+    .card{background:#fff;border-radius:16px;border:.5px solid #e0e0da;max-width:700px;width:100%;padding:2rem 2.5rem;position:relative}
+    /* Language toggle */
+    .lang-toggle{position:absolute;top:1.25rem;right:1.25rem;display:flex;gap:4px;z-index:10}
+    .lang-btn{padding:6px 12px;border-radius:20px;border:.5px solid #e0e0da;font-size:12px;font-weight:600;cursor:pointer;background:none;color:#888;font-family:inherit;min-width:44px;min-height:36px}
+    .lang-btn.active{background:#1D9E75;border-color:#1D9E75;color:#fff}
+    /* Language screen */
+    #lang-screen{text-align:center;padding:2rem 0}
+    #lang-screen h1{font-size:22px;font-weight:600;margin-bottom:.5rem}
+    #lang-screen p{font-size:14px;color:#666;margin-bottom:2rem}
+    .lang-choice-btn{display:block;width:100%;padding:14px;border:.5px solid #e0e0da;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;background:none;font-family:inherit;color:#1a1a1a;margin-bottom:12px;transition:background .15s,border-color .15s}
+    .lang-choice-btn:hover{background:#f5f5f3;border-color:#1D9E75}
+    .logo{font-size:13px;font-weight:500;color:#1D9E75;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.5rem}
+    .progress-bar{height:4px;background:#e8e8e4;border-radius:2px;margin-bottom:2rem}
+    .progress-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width .3s}
+    .section-label{font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+    .badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:.75rem}
+    .badge-r{background:#E6F1FB;color:#0C447C}
+    .badge-v{background:#FAEEDA;color:#633806}
+    .q-title{font-size:18px;font-weight:500;margin-bottom:1.25rem;line-height:1.4}
+    .q-block{margin-bottom:1.5rem}
+    .block-label{display:block;font-size:14px;font-weight:600;color:#444;margin-bottom:.5rem;margin-top:.75rem}
+    .options{display:flex;flex-direction:column;gap:8px}
+    .opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:.5px solid #e0e0da;border-radius:8px;cursor:pointer;transition:background .15s,border-color .15s;font-size:14px;color:#1a1a1a;user-select:none}
+    .opt:hover{background:#f5f5f3;border-color:#c8c8c2}
+    .opt.sel{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+    .opt.sel-r{background:#E6F1FB;border-color:#185FA5;color:#0C447C}
+    .opt.sel-v{background:#FAEEDA;border-color:#BA7517;color:#633806}
+    .opt input[type=radio],.opt input[type=checkbox]{accent-color:#1D9E75;flex-shrink:0;margin-top:3px}
+    .other-input{display:block;margin-top:6px;width:100%;padding:6px 10px;font-size:13px;border:.5px solid #e0e0da;border-radius:6px;background:#fff;font-family:inherit;color:#1a1a1a}
+    .other-input:focus{outline:none;border-color:#1D9E75}
+    .scale-row{display:flex;gap:8px}
+    .scale-btn{flex:1;padding:8px 4px;border:.5px solid #e0e0da;border-radius:8px;cursor:pointer;text-align:center;font-size:13px;color:#666;background:none;font-family:inherit;transition:background .15s,border-color .15s}
+    .scale-btn:hover{background:#f5f5f3}
+    .scale-btn.sel{background:#E1F5EE;border-color:#1D9E75;color:#085041;font-weight:500}
+    .scale-labels{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:4px}
+    input[type=text]{width:100%;padding:10px 12px;font-size:14px;border:.5px solid #e0e0da;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit}
+    input[type=text]:focus{outline:none;border-color:#1D9E75}
+    textarea{width:100%;padding:10px 12px;font-size:14px;border:.5px solid #e0e0da;border-radius:8px;background:#fff;color:#1a1a1a;resize:vertical;min-height:80px;font-family:inherit}
+    textarea:focus{outline:none;border-color:#1D9E75}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem}
+    .btn{padding:9px 22px;border:.5px solid #c8c8c2;border-radius:8px;cursor:pointer;font-size:14px;background:none;color:#1a1a1a;font-family:inherit}
+    .btn:hover{background:#f5f5f3}
+    .btn.primary{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:500}
+    .btn.primary:hover{background:#0F6E56}
+    .step-count{font-size:13px;color:#888}
+    .err{font-size:13px;color:#A32D2D;margin-top:.4rem;display:none}
+    .err.on{display:block}
+    .options.inv .opt:not(.sel):not(.sel-r):not(.sel-v){border-color:#F09595}
+    .scale-row.inv .scale-btn{border-color:#F09595}
+    .thank-you{text-align:center;padding:2rem 0}
+    .check-circle{width:56px;height:56px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+    .thank-you h2{font-size:20px;font-weight:500;margin-bottom:.5rem}
+    .thank-you p{font-size:14px;color:#666;max-width:380px;margin:0 auto}
+    .transition-note{background:#FAEEDA;border-radius:8px;padding:10px 14px;font-size:13px;color:#633806;margin-bottom:1rem}
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Language toggle (always visible after language chosen) -->
+  <div class="lang-toggle" id="lang-toggle" style="display:none">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="btn-de" onclick="setLang('de')">DE</button>
+  </div>
+
+  <!-- Language selection screen -->
+  <div id="lang-screen">
+    <h1>🌍</h1>
+    <p>Please choose your language / Bitte wähle deine Sprache</p>
+    <button class="lang-choice-btn" onclick="startWithLang('en')">🇬🇧 &nbsp;English</button>
+    <button class="lang-choice-btn" onclick="startWithLang('de')">🇩🇪 &nbsp;Deutsch</button>
+  </div>
+
+  <div class="logo" id="logo" style="display:none" data-en="Reuse Container Research" data-de="Mehrweg-Behälter Forschung">Reuse Container Research</div>
+  <div class="progress-bar" id="progress-bar" style="display:none"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+  <div id="steps" style="display:none">
+
+  <!-- ══ STEP: demographics ══ -->
+  <div class="step" data-id="demographics">
+    <div class="section-label t" data-en="Step 1 — About you" data-de="Schritt 1 — Über dich">Step 1 — About you</div>
+    <div class="q-title t" data-en="A few quick questions to help us interpret the results." data-de="Ein paar kurze Fragen, die uns helfen, die Ergebnisse einzuordnen.">A few quick questions to help us interpret the results.</div>
+
+    <div class="q-block">
+      <span class="block-label t" data-en="Age range *" data-de="Altersgruppe *">Age range *</span>
+      <div class="options" data-key="age" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="age" value="u25"><span class="t" data-en="Under 25" data-de="Unter 25">Under 25</span></label>
+        <label class="opt"><input type="radio" name="age" value="25_34"><span class="t" data-en="25–34" data-de="25–34">25–34</span></label>
+        <label class="opt"><input type="radio" name="age" value="35_49"><span class="t" data-en="35–49" data-de="35–49">35–49</span></label>
+        <label class="opt"><input type="radio" name="age" value="50p"><span class="t" data-en="50 or older" data-de="50 oder älter">50 or older</span></label>
+        <label class="opt"><input type="radio" name="age" value="prefer_not"><span class="t" data-en="Prefer not to say" data-de="Keine Angabe">Prefer not to say</span></label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <span class="block-label t" data-en="In which city or town do you live? *" data-de="In welcher Stadt oder Gemeinde lebst du? *">In which city or town do you live? *</span>
+      <input type="text" id="city-input" data-en-placeholder="e.g. Berlin, Lyon, Munich…" data-de-placeholder="z.B. Berlin, München, Hamburg…" placeholder="e.g. Berlin, Lyon, Munich…"/>
+      <p class="err t" id="city-err" data-en="Please enter your city or town before continuing." data-de="Bitte gib deinen Wohnort ein, bevor du fortfährst.">Please enter your city or town before continuing.</p>
+    </div>
+
+    <div class="q-block">
+      <span class="block-label t" data-en="How would you describe the area where you live? *" data-de="Wie würdest du das Gebiet beschreiben, in dem du lebst? *">How would you describe the area where you live? *</span>
+      <div class="options" data-key="area_type" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="area_type" value="city_centre"><span class="t" data-en="City centre / urban core" data-de="Stadtzentrum / Innenstadt">City centre / urban core</span></label>
+        <label class="opt"><input type="radio" name="area_type" value="suburb"><span class="t" data-en="Suburban area" data-de="Vorstadt / Stadtrand">Suburban area</span></label>
+        <label class="opt"><input type="radio" name="area_type" value="small_town"><span class="t" data-en="Small town" data-de="Kleinstadt">Small town</span></label>
+        <label class="opt"><input type="radio" name="area_type" value="rural"><span class="t" data-en="Rural / countryside" data-de="Ländlich / Land">Rural / countryside</span></label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <span class="block-label t" data-en="What is your highest level of education? *" data-de="Was ist dein höchster Schulabschluss / akademischer Abschluss? *">What is your highest level of education? *</span>
+      <div class="options" data-key="education" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="education" value="no_qual"><span class="t" data-en="No formal qualification" data-de="Kein Schulabschluss">No formal qualification</span></label>
+        <label class="opt"><input type="radio" name="education" value="secondary"><span class="t" data-en="Secondary school (e.g. GCSE / Hauptschule / Realschule)" data-de="Hauptschulabschluss / Realschulabschluss (Mittlere Reife)">Secondary school (e.g. GCSE / Hauptschule / Realschule)</span></label>
+        <label class="opt"><input type="radio" name="education" value="abitur"><span class="t" data-en="Upper secondary / A-levels (e.g. Abitur / Baccalaureate)" data-de="Abitur / Fachabitur / Hochschulreife">Upper secondary / A-levels (e.g. Abitur / Baccalaureate)</span></label>
+        <label class="opt"><input type="radio" name="education" value="vocational"><span class="t" data-en="Vocational training / apprenticeship" data-de="Berufsausbildung / Lehre abgeschlossen">Vocational training / apprenticeship</span></label>
+        <label class="opt"><input type="radio" name="education" value="bachelor"><span class="t" data-en="Bachelor's degree / FH" data-de="Bachelor / FH-Abschluss">Bachelor's degree / FH</span></label>
+        <label class="opt"><input type="radio" name="education" value="master"><span class="t" data-en="Master's / Diplom / Magister" data-de="Master / Diplom / Magister">Master's / Diplom / Magister</span></label>
+        <label class="opt"><input type="radio" name="education" value="phd"><span class="t" data-en="Doctorate (PhD / Dr.)" data-de="Promotion (Dr.)">Doctorate (PhD / Dr.)</span></label>
+        <label class="opt"><input type="radio" name="education" value="prefer_not"><span class="t" data-en="Prefer not to say" data-de="Keine Angabe">Prefer not to say</span></label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <span class="block-label t" data-en="What is your current employment status? *" data-de="Was ist dein aktueller Beschäftigungsstatus? *">What is your current employment status? *</span>
+      <div class="options" data-key="employment" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="employment" value="student"><span class="t" data-en="Student (full-time)" data-de="Student/in (Vollzeit)">Student (full-time)</span></label>
+        <label class="opt"><input type="radio" name="employment" value="employed_full"><span class="t" data-en="Employed full-time" data-de="Angestellt (Vollzeit)">Employed full-time</span></label>
+        <label class="opt"><input type="radio" name="employment" value="employed_part"><span class="t" data-en="Employed part-time" data-de="Angestellt (Teilzeit)">Employed part-time</span></label>
+        <label class="opt"><input type="radio" name="employment" value="self_employed"><span class="t" data-en="Self-employed / freelance" data-de="Selbstständig / freiberuflich">Self-employed / freelance</span></label>
+        <label class="opt"><input type="radio" name="employment" value="student_working"><span class="t" data-en="Student and working part-time" data-de="Student/in und nebenbei arbeitend">Student and working part-time</span></label>
+        <label class="opt"><input type="radio" name="employment" value="unemployed"><span class="t" data-en="Currently not employed" data-de="Derzeit nicht erwerbstätig">Currently not employed</span></label>
+        <label class="opt"><input type="radio" name="employment" value="retired"><span class="t" data-en="Retired" data-de="Rentner/in">Retired</span></label>
+        <label class="opt"><input type="radio" name="employment" value="prefer_not"><span class="t" data-en="Prefer not to say" data-de="Keine Angabe">Prefer not to say</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP: habits ══ -->
+  <div class="step" data-id="habits" style="display:none">
+    <div class="section-label t" data-en="Step 2 — Habits" data-de="Schritt 2 — Gewohnheiten">Step 2 — Habits</div>
+    <div class="q-title t" data-en="How often do you buy food or drinks to go? *" data-de="Wie oft kaufst du Essen oder Getränke zum Mitnehmen? *">How often do you buy food or drinks to go? *</div>
+    <div class="options" data-key="frequency" data-type="radio" data-acc="g" data-req="1">
+      <label class="opt"><input type="radio" name="frequency" value="daily"><span class="t" data-en="Every day" data-de="Täglich">Every day</span></label>
+      <label class="opt"><input type="radio" name="frequency" value="several_week"><span class="t" data-en="Several times a week" data-de="Mehrmals pro Woche">Several times a week</span></label>
+      <label class="opt"><input type="radio" name="frequency" value="once_week"><span class="t" data-en="About once a week" data-de="Etwa einmal pro Woche">About once a week</span></label>
+      <label class="opt"><input type="radio" name="frequency" value="rarely"><span class="t" data-en="Rarely or never" data-de="Selten oder nie">Rarely or never</span></label>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label t" data-en="Where do you usually get takeaway? (select all that apply)" data-de="Wo holst du dir normalerweise Essen zum Mitnehmen? (Mehrfachauswahl möglich)">Where do you usually get takeaway? (select all that apply)</span>
+      <div class="options" data-key="takeaway_loc" data-type="checkbox" data-acc="g">
+        <label class="opt"><input type="checkbox" value="city_centre"><span class="t" data-en="City centre / commercial area" data-de="Stadtzentrum / Einkaufsbereich">City centre / commercial area</span></label>
+        <label class="opt"><input type="checkbox" value="workplace"><span class="t" data-en="Near my workplace" data-de="In der Nähe meines Arbeitsplatzes">Near my workplace</span></label>
+        <label class="opt"><input type="checkbox" value="residential"><span class="t" data-en="In my neighbourhood" data-de="In meiner Nachbarschaft">In my neighbourhood</span></label>
+        <label class="opt"><input type="checkbox" value="campus"><span class="t" data-en="University or school campus" data-de="Uni- oder Schulcampus">University or school campus</span></label>
+        <label class="opt"><input type="checkbox" value="transport"><span class="t" data-en="Train station / airport" data-de="Bahnhof / Flughafen">Train station / airport</span></label>
+      </div>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label t" data-en="How often do you see others using reusable containers at cafés or takeaway spots? *" data-de="Wie oft siehst du andere Menschen, die Mehrwegbehälter in Cafés oder beim Takeaway nutzen? *">How often do you see others using reusable containers at cafés or takeaway spots? *</span>
+      <div class="options" data-key="social_exposure" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="social_exposure" value="very_often"><span class="t" data-en="Very often — it is common around me" data-de="Sehr oft — es ist bei mir üblich">Very often — it is common around me</span></label>
+        <label class="opt"><input type="radio" name="social_exposure" value="occasionally"><span class="t" data-en="Occasionally — I notice it sometimes" data-de="Gelegentlich — ich bemerke es manchmal">Occasionally — I notice it sometimes</span></label>
+        <label class="opt"><input type="radio" name="social_exposure" value="rarely"><span class="t" data-en="Rarely — I almost never see it" data-de="Selten — ich sehe es kaum">Rarely — I almost never see it</span></label>
+        <label class="opt"><input type="radio" name="social_exposure" value="never"><span class="t" data-en="Never" data-de="Nie">Never</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP: awareness ══ -->
+  <div class="step" data-id="awareness" style="display:none">
+    <div class="section-label t" data-en="Step 3 — Awareness" data-de="Schritt 3 — Bekanntheit">Step 3 — Awareness</div>
+    <div class="q-title t" data-en="Which of these reusable container systems have you heard of? *" data-de="Welche dieser Mehrwegsysteme kennst du? *">Which of these reusable container systems have you heard of? *</div>
+    <div class="options" data-key="awareness" data-type="radio" data-acc="g" data-req="1">
+      <label class="opt"><input type="radio" name="awareness" value="recup_only"><span class="t" data-en="ReCup only" data-de="Nur ReCup">ReCup only</span></label>
+      <label class="opt"><input type="radio" name="awareness" value="vytal_only"><span class="t" data-en="Vytal only" data-de="Nur Vytal">Vytal only</span></label>
+      <label class="opt"><input type="radio" name="awareness" value="both"><span class="t" data-en="Both ReCup and Vytal" data-de="Sowohl ReCup als auch Vytal">Both ReCup and Vytal</span></label>
+      <label class="opt"><input type="radio" name="awareness" value="neither"><span class="t" data-en="Neither — I haven't heard of either" data-de="Keines davon — ich kenne keines">Neither — I haven't heard of either</span></label>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label t" data-en="Do you know any other reusable container systems not listed above?" data-de="Kennst du andere Mehrwegsysteme, die oben nicht aufgeführt sind?">Do you know any other reusable container systems not listed above?</span>
+      <input type="text" id="awareness-other" data-en-placeholder="e.g. Recircle, Relevo… (leave blank if none)" data-de-placeholder="z.B. Recircle, Relevo… (freilassen, wenn keine)" placeholder="e.g. Recircle, Relevo… (leave blank if none)"/>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label t" data-en="Are reusable container return points easily accessible where you live or work? *" data-de="Sind Rückgabestellen für Mehrwegbehälter in deiner Nähe leicht zugänglich? *">Are reusable container return points easily accessible where you live or work? *</span>
+      <div class="options" data-key="return_access" data-type="radio" data-acc="g" data-req="1">
+        <label class="opt"><input type="radio" name="return_access" value="yes"><span class="t" data-en="Yes, easily accessible" data-de="Ja, gut erreichbar">Yes, easily accessible</span></label>
+        <label class="opt"><input type="radio" name="return_access" value="somewhat"><span class="t" data-en="Somewhat — I know of a few but they are not very convenient" data-de="Teilweise — ich kenne ein paar, aber sie sind nicht sehr praktisch">Somewhat — I know of a few but they are not very convenient</span></label>
+        <label class="opt"><input type="radio" name="return_access" value="no"><span class="t" data-en="No, there are none near me" data-de="Nein, es gibt keine in meiner Nähe">No, there are none near me</span></label>
+        <label class="opt"><input type="radio" name="return_access" value="dont_know"><span class="t" data-en="I don't know" data-de="Ich weiß es nicht">I don't know</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEITHER GENERAL BLOCK ══ -->
+  <div class="step" data-id="neither_appeals" style="display:none">
+    <div class="section-label t" data-en="Reusable containers — general" data-de="Mehrwegbehälter — allgemein">Reusable containers — general</div>
+    <div class="q-title t" data-en="What do you think would appeal to you about reusable container systems in general? * (select all that apply)" data-de="Was würde dich an Mehrwegsystemen grundsätzlich ansprechen? * (Mehrfachauswahl möglich)">What do you think would appeal to you about reusable container systems in general? * (select all that apply)</div>
+    <div class="options" data-key="neither_appeals" data-type="checkbox" data-acc="g" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"><span class="t" data-en="It would help me reduce single-use waste" data-de="Es würde mir helfen, Einwegmüll zu reduzieren">It would help me reduce single-use waste</span></label>
+      <label class="opt"><input type="checkbox" value="convenient"><span class="t" data-en="It would be easy and convenient to use" data-de="Es wäre einfach und praktisch zu nutzen">It would be easy and convenient to use</span></label>
+      <label class="opt"><input type="checkbox" value="quality"><span class="t" data-en="Good container quality" data-de="Gute Behälterqualität">Good container quality</span></label>
+      <label class="opt"><input type="checkbox" value="process"><span class="t" data-en="A simple deposit / return process" data-de="Ein einfaches Pfand- / Rückgabesystem">A simple deposit / return process</span></label>
+      <label class="opt"><input type="checkbox" value="availability"><span class="t" data-en="Available at the places I usually go" data-de="Verfügbar an den Orten, die ich regelmäßig besuche">Available at the places I usually go</span></label>
+      <label class="opt"><input type="checkbox" value="price"><span class="t" data-en="A fair price compared to single-use packaging" data-de="Ein fairer Preis im Vergleich zu Einwegverpackungen">A fair price compared to single-use packaging</span></label>
+      <label class="opt"><input type="checkbox" value="social"><span class="t" data-en="I would feel good using it in front of others" data-de="Ich würde mich dabei gut fühlen, es vor anderen zu nutzen">I would feel good using it in front of others</span></label>
+      <label class="opt"><input type="checkbox" value="nothing"><span class="t" data-en="Nothing would appeal to me" data-de="Nichts davon würde mich ansprechen">Nothing would appeal to me</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="neither-appeals-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="neither_barriers" style="display:none">
+    <div class="section-label t" data-en="Reusable containers — general" data-de="Mehrwegbehälter — allgemein">Reusable containers — general</div>
+    <div class="q-title t" data-en="What do you think would be the biggest barriers to using a reusable container system? * (select all that apply)" data-de="Was wären deiner Meinung nach die größten Hindernisse bei der Nutzung eines Mehrwegsystems? * (Mehrfachauswahl möglich)">What do you think would be the biggest barriers to using a reusable container system? * (select all that apply)</div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Practical" data-de="Praktisch">Practical</span>
+      <div class="options" data-key="neither_bar_p" data-type="checkbox" data-acc="g" data-req="1">
+        <label class="opt"><input type="checkbox" value="convenience"><span class="t" data-en="Single-use would still seem more convenient" data-de="Einwegprodukte wirken immer noch praktischer">Single-use would still seem more convenient</span></label>
+        <label class="opt"><input type="checkbox" value="no_space"><span class="t" data-en="No space in my bag to carry a container" data-de="Kein Platz in meiner Tasche für einen Behälter">No space in my bag to carry a container</span></label>
+        <label class="opt"><input type="checkbox" value="deposit"><span class="t" data-en="Having to pay a deposit upfront" data-de="Einen Pfandbetrag im Voraus zahlen müssen">Having to pay a deposit upfront</span></label>
+        <label class="opt"><input type="checkbox" value="complicated"><span class="t" data-en="The process seems complicated" data-de="Der Prozess erscheint kompliziert">The process seems complicated</span></label>
+        <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="Not available at my usual places" data-de="Nicht an meinen üblichen Orten verfügbar">Not available at my usual places</span></label>
+        <label class="opt"><input type="checkbox" value="no_return_points"><span class="t" data-en="Not enough return points near me" data-de="Zu wenige Rückgabestellen in meiner Nähe">Not enough return points near me</span></label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"><span class="t" data-en="Nobody around me uses these systems" data-de="Niemand in meinem Umfeld nutzt solche Systeme">Nobody around me uses these systems</span></label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"><span class="t" data-en="I'm not convinced it is better for the environment" data-de="Ich bin nicht überzeugt, dass es besser für die Umwelt ist">I'm not convinced it is better for the environment</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+        <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="neither-bar-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Hygiene &amp; material concerns" data-de="Hygiene &amp; Materialbedenken">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="neither_bar_h" data-type="checkbox" data-acc="g" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"><span class="t" data-en="Unsure how well containers would be cleaned between uses" data-de="Unsicher, wie gründlich Behälter zwischen den Nutzungen gereinigt werden">Unsure how well containers would be cleaned between uses</span></label>
+        <label class="opt"><input type="checkbox" value="contamination"><span class="t" data-en="Risk of contamination from previous users" data-de="Risiko einer Kontamination durch Vornutzer">Risk of contamination from previous users</span></label>
+        <label class="opt"><input type="checkbox" value="smell"><span class="t" data-en="Concern about lingering odours or stains" data-de="Bedenken wegen verbleibender Gerüche oder Flecken">Concern about lingering odours or stains</span></label>
+        <label class="opt"><input type="checkbox" value="plastics"><span class="t" data-en="Concerns about plastic releasing microplastics" data-de="Bedenken wegen Mikroplastik aus dem Behältermaterial">Concerns about plastic releasing microplastics</span></label>
+        <label class="opt"><input type="checkbox" value="material"><span class="t" data-en="General uncertainty about container material or safety" data-de="Allgemeine Unsicherheit über das Behältermaterial oder die Sicherheit">General uncertainty about container material or safety</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="neither_bridge" style="display:none">
+    <div class="section-label t" data-en="Reusable containers — bridge question" data-de="Mehrwegbehälter — Schlüsselfrage">Reusable containers — bridge question</div>
+    <div class="q-title t" data-en="What would be the single biggest barrier to you trying a reusable container system? *" data-de="Was wäre das größte Hindernis, ein Mehrwegsystem auszuprobieren? *">What would be the single biggest barrier to you trying a reusable container system? *</div>
+    <div class="options" data-key="neither_top" data-type="radio" data-acc="g" data-req="1">
+      <label class="opt"><input type="radio" name="neither_top" value="convenience"><span class="t" data-en="Situational convenience — single-use is just easier" data-de="Bequemlichkeit — Einweg ist einfach praktischer">Situational convenience — single-use is just easier</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="infrastructure"><span class="t" data-en="Not enough return points or venues offering it" data-de="Zu wenige Rückgabestellen oder Angebotsstellen">Not enough return points or venues offering it</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="complexity"><span class="t" data-en="The system seems too complicated" data-de="Das System erscheint mir zu kompliziert">The system seems too complicated</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="cost"><span class="t" data-en="Cost or deposit concerns" data-de="Kosten oder Pfandbedenken">Cost or deposit concerns</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="hygiene"><span class="t" data-en="Hygiene or material concerns" data-de="Hygiene- oder Materialbedenken">Hygiene or material concerns</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="habit"><span class="t" data-en="I haven't thought about it / no particular reason" data-de="Ich habe darüber noch nicht nachgedacht / kein bestimmter Grund">I haven't thought about it / no particular reason</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="social"><span class="t" data-en="Social or environmental skepticism" data-de="Soziale oder ökologische Skepsis">Social or environmental skepticism</span></label>
+      <label class="opt"><input type="radio" name="neither_top" value="no_barrier"><span class="t" data-en="No barrier — I'd happily try it" data-de="Kein Hindernis — ich würde es gerne ausprobieren">No barrier — I'd happily try it</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="neither_open" style="display:none">
+    <div class="section-label t" data-en="Reusable containers — open comment" data-de="Mehrwegbehälter — offener Kommentar">Reusable containers — open comment</div>
+    <div class="q-title t" data-en="Any other thoughts on reusable container systems you'd like to share?" data-de="Hast du weitere Gedanken zu Mehrwegsystemen, die du teilen möchtest?">Any other thoughts on reusable container systems you'd like to share?</div>
+    <textarea id="neither-open" data-en-placeholder="Optional…" data-de-placeholder="Optional…" placeholder="Optional…" rows="4"></textarea>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       RECUP STEPS
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="recup_usage" style="display:none">
+    <div class="section-label t" data-en="ReCup — Usage" data-de="ReCup — Nutzung">ReCup — Usage</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="Have you ever used ReCup? *" data-de="Hast du ReCup schon einmal genutzt? *">Have you ever used ReCup? *</div>
+    <div class="options" data-key="recup_usage" data-type="radio" data-acc="r" data-req="1">
+      <label class="opt"><input type="radio" name="recup_usage" value="regular"><span class="t" data-en="Yes, I use it regularly" data-de="Ja, ich nutze es regelmäßig">Yes, I use it regularly</span></label>
+      <label class="opt"><input type="radio" name="recup_usage" value="occasional"><span class="t" data-en="Yes, I use it every now and then when I need takeaway" data-de="Ja, ich nutze es gelegentlich, wenn ich Takeaway kaufe">Yes, I use it every now and then when I need takeaway</span></label>
+      <label class="opt"><input type="radio" name="recup_usage" value="stopped"><span class="t" data-en="I tried it but stopped using it" data-de="Ich habe es ausprobiert, aber aufgehört es zu nutzen">I tried it but stopped using it</span></label>
+      <label class="opt"><input type="radio" name="recup_usage" value="never"><span class="t" data-en="No, never" data-de="Nein, nie">No, never</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_ease" style="display:none">
+    <div class="section-label t" data-en="ReCup — Ease of use" data-de="ReCup — Benutzerfreundlichkeit">ReCup — Ease of use</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="How easy did you find the process of borrowing and returning a ReCup container? *" data-de="Wie einfach fandest du den Prozess des Ausleihens und Zurückgebens eines ReCup-Behälters? *">How easy did you find the process of borrowing and returning a ReCup container? *</div>
+    <div class="q-block">
+      <div class="scale-row" id="recup-ease-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span class="t" data-en="Very difficult" data-de="Sehr schwierig">Very difficult</span><span class="t" data-en="Very easy" data-de="Sehr einfach">Very easy</span></div>
+      <p class="err t" id="recup-ease-err" data-en="Please select a rating before continuing." data-de="Bitte wähle eine Bewertung, bevor du fortfährst.">Please select a rating before continuing.</p>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_likes" style="display:none">
+    <div class="section-label t" data-en="ReCup — What you like" data-de="ReCup — Was dir gefällt">ReCup — What you like</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="What do you like or value about ReCup? * (select all that apply)" data-de="Was magst oder schätzt du an ReCup? * (Mehrfachauswahl möglich)">What do you like or value about ReCup? * (select all that apply)</div>
+    <div class="options" data-key="recup_likes" data-type="checkbox" data-acc="r" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"><span class="t" data-en="It helps me reduce single-use waste" data-de="Es hilft mir, Einwegmüll zu reduzieren">It helps me reduce single-use waste</span></label>
+      <label class="opt"><input type="checkbox" value="convenient"><span class="t" data-en="It is easy and convenient to use" data-de="Es ist einfach und praktisch zu nutzen">It is easy and convenient to use</span></label>
+      <label class="opt"><input type="checkbox" value="quality"><span class="t" data-en="The container quality is good" data-de="Die Behälterqualität ist gut">The container quality is good</span></label>
+      <label class="opt"><input type="checkbox" value="process"><span class="t" data-en="The deposit / return process is straightforward" data-de="Der Pfand- / Rückgabeprozess ist unkompliziert">The deposit / return process is straightforward</span></label>
+      <label class="opt"><input type="checkbox" value="availability"><span class="t" data-en="It is available at the places I go to" data-de="Es ist an meinen üblichen Orten verfügbar">It is available at the places I go to</span></label>
+      <label class="opt"><input type="checkbox" value="price"><span class="t" data-en="The price is fair compared to single-use packaging" data-de="Der Preis ist fair im Vergleich zu Einwegverpackungen">The price is fair compared to single-use packaging</span></label>
+      <label class="opt"><input type="checkbox" value="social"><span class="t" data-en="I feel good using it in front of others" data-de="Ich fühle mich gut dabei, es vor anderen zu nutzen">I feel good using it in front of others</span></label>
+      <label class="opt"><input type="checkbox" value="nothing"><span class="t" data-en="Nothing in particular" data-de="Nichts Bestimmtes">Nothing in particular</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="recup-likes-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_dislikes" style="display:none">
+    <div class="section-label t" data-en="ReCup — What you don't like" data-de="ReCup — Was dir nicht gefällt">ReCup — What you don't like</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="What do you find frustrating or off-putting about ReCup? * (select all that apply)" data-de="Was findest du an ReCup frustrierend oder abschreckend? * (Mehrfachauswahl möglich)">What do you find frustrating or off-putting about ReCup? * (select all that apply)</div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Practical issues" data-de="Praktische Probleme">Practical issues</span>
+      <div class="options" data-key="recup_dislikes_p" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"><span class="t" data-en="Single-use is more convenient in the moment" data-de="Einweg ist im Moment praktischer">Single-use is more convenient in the moment</span></label>
+        <label class="opt"><input type="checkbox" value="no_space"><span class="t" data-en="No space in my bag to carry the container" data-de="Kein Platz in meiner Tasche für den Behälter">No space in my bag to carry the container</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_cost"><span class="t" data-en="Having to pay a deposit upfront" data-de="Einen Pfandbetrag im Voraus zahlen müssen">Having to pay a deposit upfront</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"><span class="t" data-en="The deposit process is complicated" data-de="Der Pfandprozess ist kompliziert">The deposit process is complicated</span></label>
+        <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="Not available at my usual places" data-de="Nicht an meinen üblichen Orten verfügbar">Not available at my usual places</span></label>
+        <label class="opt"><input type="checkbox" value="system_complicated"><span class="t" data-en="The overall system is too complicated" data-de="Das Gesamtsystem ist zu kompliziert">The overall system is too complicated</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_low"><span class="t" data-en="The deposit value is too low to motivate returning" data-de="Der Pfandwert ist zu niedrig, um die Rückgabe zu motivieren">The deposit value is too low to motivate returning</span></label>
+        <label class="opt"><input type="checkbox" value="no_return_points"><span class="t" data-en="Not enough return points near me" data-de="Zu wenige Rückgabestellen in meiner Nähe">Not enough return points near me</span></label>
+        <label class="opt"><input type="checkbox" value="waiting_times"><span class="t" data-en="Waiting times at return points" data-de="Wartezeiten an Rückgabestellen">Waiting times at return points</span></label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"><span class="t" data-en="Nobody around me uses it" data-de="Niemand in meinem Umfeld nutzt es">Nobody around me uses it</span></label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"><span class="t" data-en="I'm not convinced it is better for the environment" data-de="Ich bin nicht überzeugt, dass es besser für die Umwelt ist">I'm not convinced it is better for the environment</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+        <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="recup-dislikes-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Hygiene &amp; material concerns" data-de="Hygiene &amp; Materialbedenken">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="recup_dislikes_h" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"><span class="t" data-en="Unsure how well it is cleaned between uses" data-de="Unsicher, wie gründlich es zwischen den Nutzungen gereinigt wird">Unsure how well it is cleaned between uses</span></label>
+        <label class="opt"><input type="checkbox" value="contamination"><span class="t" data-en="Risk of contamination from previous users" data-de="Risiko einer Kontamination durch Vornutzer">Risk of contamination from previous users</span></label>
+        <label class="opt"><input type="checkbox" value="smell"><span class="t" data-en="Concern about lingering odours or stains" data-de="Bedenken wegen verbleibender Gerüche oder Flecken">Concern about lingering odours or stains</span></label>
+        <label class="opt"><input type="checkbox" value="plastics"><span class="t" data-en="Concerns about plastic releasing microplastics" data-de="Bedenken wegen Mikroplastik aus dem Behältermaterial">Concerns about plastic releasing microplastics</span></label>
+        <label class="opt"><input type="checkbox" value="material"><span class="t" data-en="General uncertainty about container material or safety" data-de="Allgemeine Unsicherheit über das Material oder die Sicherheit">General uncertainty about container material or safety</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_stopped" style="display:none">
+    <div class="section-label t" data-en="ReCup — Why did you stop?" data-de="ReCup — Warum hast du aufgehört?">ReCup — Why did you stop?</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="What specifically made you stop using ReCup? * (select all that apply)" data-de="Was hat dich dazu gebracht, ReCup nicht mehr zu nutzen? * (Mehrfachauswahl möglich)">What specifically made you stop using ReCup? * (select all that apply)</div>
+    <div class="options" data-key="recup_stopped" data-type="checkbox" data-acc="r" data-req="1">
+      <label class="opt"><input type="checkbox" value="too_complicated"><span class="t" data-en="The process was more complicated than expected" data-de="Der Prozess war komplizierter als erwartet">The process was more complicated than expected</span></label>
+      <label class="opt"><input type="checkbox" value="forgot_habit"><span class="t" data-en="I forgot to make it a habit" data-de="Ich habe vergessen, es zur Gewohnheit zu machen">I forgot to make it a habit</span></label>
+      <label class="opt"><input type="checkbox" value="return_hassle"><span class="t" data-en="Returning the container was too much hassle" data-de="Die Rückgabe war zu umständlich">Returning the container was too much hassle</span></label>
+      <label class="opt"><input type="checkbox" value="not_worth"><span class="t" data-en="It didn't feel worth the effort" data-de="Es hat sich nicht gelohnt">It didn't feel worth the effort</span></label>
+      <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="It stopped being available at my usual place" data-de="Es war nicht mehr an meinen üblichen Orten verfügbar">It stopped being available at my usual place</span></label>
+      <label class="opt"><input type="checkbox" value="hygiene"><span class="t" data-en="I had hygiene or quality concerns after using it" data-de="Ich hatte nach der Nutzung Hygiene- oder Qualitätsbedenken">I had hygiene or quality concerns after using it</span></label>
+      <label class="opt"><input type="checkbox" value="social_awkward"><span class="t" data-en="I felt uncomfortable or awkward using it" data-de="Ich fühlte mich unwohl dabei, es zu nutzen">I felt uncomfortable or awkward using it</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other reason" data-de="Anderer Grund">Other reason</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_appeals" style="display:none">
+    <div class="section-label t" data-en="ReCup — What would appeal to you" data-de="ReCup — Was dich ansprechen würde">ReCup — What would appeal to you</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="What do you think would appeal to you about ReCup, if you tried it? * (select all that apply)" data-de="Was würde dich an ReCup ansprechen, wenn du es ausprobieren würdest? * (Mehrfachauswahl möglich)">What do you think would appeal to you about ReCup, if you tried it? * (select all that apply)</div>
+    <div class="options" data-key="recup_appeals" data-type="checkbox" data-acc="r" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"><span class="t" data-en="It would help me reduce single-use waste" data-de="Es würde mir helfen, Einwegmüll zu reduzieren">It would help me reduce single-use waste</span></label>
+      <label class="opt"><input type="checkbox" value="convenient"><span class="t" data-en="It would be easy and convenient to use" data-de="Es wäre einfach und praktisch zu nutzen">It would be easy and convenient to use</span></label>
+      <label class="opt"><input type="checkbox" value="quality"><span class="t" data-en="The container quality looks good" data-de="Die Behälterqualität sieht gut aus">The container quality looks good</span></label>
+      <label class="opt"><input type="checkbox" value="process"><span class="t" data-en="The deposit / return process seems straightforward" data-de="Der Pfand- / Rückgabeprozess wirkt unkompliziert">The deposit / return process seems straightforward</span></label>
+      <label class="opt"><input type="checkbox" value="availability"><span class="t" data-en="It would be available at the places I go to" data-de="Es wäre an meinen üblichen Orten verfügbar">It would be available at the places I go to</span></label>
+      <label class="opt"><input type="checkbox" value="price"><span class="t" data-en="The price seems fair compared to single-use packaging" data-de="Der Preis erscheint fair im Vergleich zu Einwegverpackungen">The price seems fair compared to single-use packaging</span></label>
+      <label class="opt"><input type="checkbox" value="social"><span class="t" data-en="I would feel good using it in front of others" data-de="Ich würde mich gut dabei fühlen, es vor anderen zu nutzen">I would feel good using it in front of others</span></label>
+      <label class="opt"><input type="checkbox" value="nothing"><span class="t" data-en="Nothing would appeal to me" data-de="Nichts würde mich ansprechen">Nothing would appeal to me</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="recup-appeals-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_barriers" style="display:none">
+    <div class="section-label t" data-en="ReCup — What puts you off trying" data-de="ReCup — Was dich vom Ausprobieren abhält">ReCup — What puts you off trying</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="What has put you off trying ReCup so far? * (select all that apply)" data-de="Was hat dich bisher davon abgehalten, ReCup auszuprobieren? * (Mehrfachauswahl möglich)">What has put you off trying ReCup so far? * (select all that apply)</div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Practical" data-de="Praktisch">Practical</span>
+      <div class="options" data-key="recup_bar_p" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"><span class="t" data-en="Single-use seems more convenient" data-de="Einweg wirkt praktischer">Single-use seems more convenient</span></label>
+        <label class="opt"><input type="checkbox" value="no_space"><span class="t" data-en="No space in my bag to carry a container" data-de="Kein Platz in meiner Tasche">No space in my bag to carry a container</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_cost"><span class="t" data-en="Having to pay a deposit upfront" data-de="Pfandbetrag im Voraus zahlen">Having to pay a deposit upfront</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"><span class="t" data-en="The deposit process seems complicated" data-de="Der Pfandprozess erscheint kompliziert">The deposit process seems complicated</span></label>
+        <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="Not available at my usual places" data-de="Nicht an meinen üblichen Orten verfügbar">Not available at my usual places</span></label>
+        <label class="opt"><input type="checkbox" value="system_complicated"><span class="t" data-en="The overall system seems too complicated" data-de="Das Gesamtsystem erscheint zu kompliziert">The overall system seems too complicated</span></label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"><span class="t" data-en="Nobody around me uses it" data-de="Niemand in meinem Umfeld nutzt es">Nobody around me uses it</span></label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"><span class="t" data-en="I'm not convinced it is better for the environment" data-de="Ich bin nicht überzeugt, dass es besser für die Umwelt ist">I'm not convinced it is better for the environment</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+        <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="recup-bar-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Hygiene &amp; material concerns" data-de="Hygiene &amp; Materialbedenken">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="recup_bar_h" data-type="checkbox" data-acc="r" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"><span class="t" data-en="Unsure how well containers would be cleaned between uses" data-de="Unsicher, wie gründlich Behälter gereinigt werden">Unsure how well containers would be cleaned between uses</span></label>
+        <label class="opt"><input type="checkbox" value="contamination"><span class="t" data-en="Risk of contamination from previous users" data-de="Risiko einer Kontamination durch Vornutzer">Risk of contamination from previous users</span></label>
+        <label class="opt"><input type="checkbox" value="smell"><span class="t" data-en="Concern about lingering odours or stains" data-de="Bedenken wegen Gerüchen oder Flecken">Concern about lingering odours or stains</span></label>
+        <label class="opt"><input type="checkbox" value="plastics"><span class="t" data-en="Concerns about plastic releasing microplastics" data-de="Bedenken wegen Mikroplastik">Concerns about plastic releasing microplastics</span></label>
+        <label class="opt"><input type="checkbox" value="material"><span class="t" data-en="General uncertainty about container material or safety" data-de="Allgemeine Unsicherheit über das Material">General uncertainty about container material or safety</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_bridge" style="display:none">
+    <div class="section-label t" data-en="ReCup — Bridge question" data-de="ReCup — Schlüsselfrage">ReCup — Bridge question</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="What is or has been the single biggest barrier to using ReCup more? *" data-de="Was ist oder war das größte Hindernis, ReCup mehr zu nutzen? *">What is or has been the single biggest barrier to using ReCup more? *</div>
+    <div class="options" data-key="recup_top" data-type="radio" data-acc="r" data-req="1">
+      <label class="opt"><input type="radio" name="recup_top" value="convenience"><span class="t" data-en="Situational convenience — single-use is just easier" data-de="Bequemlichkeit — Einweg ist einfach praktischer">Situational convenience — single-use is just easier</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="infrastructure"><span class="t" data-en="Not enough return points or venues offering it" data-de="Zu wenige Rückgabestellen oder Angebotsstellen">Not enough return points or venues offering it</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="complexity"><span class="t" data-en="The system is too complicated" data-de="Das System ist zu kompliziert">The system is too complicated</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="cost"><span class="t" data-en="Cost or deposit issues" data-de="Kosten oder Pfandprobleme">Cost or deposit issues</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="hygiene"><span class="t" data-en="Hygiene or material concerns" data-de="Hygiene- oder Materialbedenken">Hygiene or material concerns</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="habit"><span class="t" data-en="I keep forgetting / haven't got around to it yet" data-de="Ich vergesse es immer / habe es noch nicht geschafft">I keep forgetting / haven't got around to it yet</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="social"><span class="t" data-en="Social or environmental skepticism" data-de="Soziale oder ökologische Skepsis">Social or environmental skepticism</span></label>
+      <label class="opt"><input type="radio" name="recup_top" value="no_barrier"><span class="t" data-en="No barrier — I'm happy using it / I'd happily try it" data-de="Kein Hindernis — ich nutze es gerne / würde es gerne ausprobieren">No barrier — I'm happy using it / I'd happily try it</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="recup_open" style="display:none">
+    <div class="section-label t" data-en="ReCup — Open comment" data-de="ReCup — Offener Kommentar">ReCup — Open comment</div>
+    <div class="badge badge-r">ReCup</div>
+    <div class="q-title t" data-en="Any other thoughts about ReCup you'd like to share?" data-de="Hast du weitere Gedanken zu ReCup, die du teilen möchtest?">Any other thoughts about ReCup you'd like to share?</div>
+    <textarea id="recup-open" data-en-placeholder="Optional…" data-de-placeholder="Optional…" placeholder="Optional…" rows="4"></textarea>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       VYTAL STEPS
+  ══════════════════════════════════════ -->
+
+  <div class="step" data-id="vytal_usage" style="display:none">
+    <div id="vytal-transition-note" style="display:none" class="transition-note">
+      <span class="t" data-en="You've completed the ReCup section. Now a few questions about Vytal, a different reusable container system." data-de="Du hast den ReCup-Abschnitt abgeschlossen. Jetzt ein paar Fragen zu Vytal, einem anderen Mehrwegsystem.">You've completed the ReCup section. Now a few questions about Vytal, a different reusable container system.</span>
+    </div>
+    <div class="section-label t" data-en="Vytal — Usage" data-de="Vytal — Nutzung">Vytal — Usage</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="Have you ever used Vytal? *" data-de="Hast du Vytal schon einmal genutzt? *">Have you ever used Vytal? *</div>
+    <div class="options" data-key="vytal_usage" data-type="radio" data-acc="v" data-req="1">
+      <label class="opt"><input type="radio" name="vytal_usage" value="regular"><span class="t" data-en="Yes, I use it regularly" data-de="Ja, ich nutze es regelmäßig">Yes, I use it regularly</span></label>
+      <label class="opt"><input type="radio" name="vytal_usage" value="occasional"><span class="t" data-en="Yes, I use it every now and then when I need takeaway" data-de="Ja, ich nutze es gelegentlich, wenn ich Takeaway kaufe">Yes, I use it every now and then when I need takeaway</span></label>
+      <label class="opt"><input type="radio" name="vytal_usage" value="stopped"><span class="t" data-en="I tried it but stopped using it" data-de="Ich habe es ausprobiert, aber aufgehört es zu nutzen">I tried it but stopped using it</span></label>
+      <label class="opt"><input type="radio" name="vytal_usage" value="never"><span class="t" data-en="No, never" data-de="Nein, nie">No, never</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_ease" style="display:none">
+    <div class="section-label t" data-en="Vytal — Ease of use" data-de="Vytal — Benutzerfreundlichkeit">Vytal — Ease of use</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="How easy did you find the process of borrowing and returning a Vytal container? *" data-de="Wie einfach fandest du den Prozess des Ausleihens und Zurückgebens eines Vytal-Behälters? *">How easy did you find the process of borrowing and returning a Vytal container? *</div>
+    <div class="q-block">
+      <div class="scale-row" id="vytal-ease-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span class="t" data-en="Very difficult" data-de="Sehr schwierig">Very difficult</span><span class="t" data-en="Very easy" data-de="Sehr einfach">Very easy</span></div>
+      <p class="err t" id="vytal-ease-err" data-en="Please select a rating before continuing." data-de="Bitte wähle eine Bewertung, bevor du fortfährst.">Please select a rating before continuing.</p>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_likes" style="display:none">
+    <div class="section-label t" data-en="Vytal — What you like" data-de="Vytal — Was dir gefällt">Vytal — What you like</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="What do you like or value about Vytal? * (select all that apply)" data-de="Was magst oder schätzt du an Vytal? * (Mehrfachauswahl möglich)">What do you like or value about Vytal? * (select all that apply)</div>
+    <div class="options" data-key="vytal_likes" data-type="checkbox" data-acc="v" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"><span class="t" data-en="It helps me reduce single-use waste" data-de="Es hilft mir, Einwegmüll zu reduzieren">It helps me reduce single-use waste</span></label>
+      <label class="opt"><input type="checkbox" value="convenient"><span class="t" data-en="It is easy and convenient to use" data-de="Es ist einfach und praktisch zu nutzen">It is easy and convenient to use</span></label>
+      <label class="opt"><input type="checkbox" value="quality"><span class="t" data-en="The container quality is good" data-de="Die Behälterqualität ist gut">The container quality is good</span></label>
+      <label class="opt"><input type="checkbox" value="process"><span class="t" data-en="The deposit / return process is straightforward" data-de="Der Pfand- / Rückgabeprozess ist unkompliziert">The deposit / return process is straightforward</span></label>
+      <label class="opt"><input type="checkbox" value="app"><span class="t" data-en="The app makes the process easy" data-de="Die App macht den Prozess einfach">The app makes the process easy</span></label>
+      <label class="opt"><input type="checkbox" value="availability"><span class="t" data-en="It is available at the places I go to" data-de="Es ist an meinen üblichen Orten verfügbar">It is available at the places I go to</span></label>
+      <label class="opt"><input type="checkbox" value="price"><span class="t" data-en="The price is fair compared to single-use packaging" data-de="Der Preis ist fair im Vergleich zu Einwegverpackungen">The price is fair compared to single-use packaging</span></label>
+      <label class="opt"><input type="checkbox" value="social"><span class="t" data-en="I feel good using it in front of others" data-de="Ich fühle mich gut dabei, es vor anderen zu nutzen">I feel good using it in front of others</span></label>
+      <label class="opt"><input type="checkbox" value="nothing"><span class="t" data-en="Nothing in particular" data-de="Nichts Bestimmtes">Nothing in particular</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="vytal-likes-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_dislikes" style="display:none">
+    <div class="section-label t" data-en="Vytal — What you don't like" data-de="Vytal — Was dir nicht gefällt">Vytal — What you don't like</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="What do you find frustrating or off-putting about Vytal? * (select all that apply)" data-de="Was findest du an Vytal frustrierend oder abschreckend? * (Mehrfachauswahl möglich)">What do you find frustrating or off-putting about Vytal? * (select all that apply)</div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Practical issues" data-de="Praktische Probleme">Practical issues</span>
+      <div class="options" data-key="vytal_dislikes_p" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"><span class="t" data-en="Single-use is more convenient in the moment" data-de="Einweg ist im Moment praktischer">Single-use is more convenient in the moment</span></label>
+        <label class="opt"><input type="checkbox" value="no_space"><span class="t" data-en="No space in my bag to carry the container" data-de="Kein Platz in meiner Tasche">No space in my bag to carry the container</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"><span class="t" data-en="The deposit process is complicated" data-de="Der Pfandprozess ist kompliziert">The deposit process is complicated</span></label>
+        <label class="opt"><input type="checkbox" value="app_install"><span class="t" data-en="Too much effort to install and register in the app" data-de="Zu viel Aufwand, die App zu installieren und sich zu registrieren">Too much effort to install and register in the app</span></label>
+        <label class="opt"><input type="checkbox" value="app_difficult"><span class="t" data-en="The app is hard to use" data-de="Die App ist schwer zu bedienen">The app is hard to use</span></label>
+        <label class="opt"><input type="checkbox" value="data_trust"><span class="t" data-en="I don't trust the app with my personal data" data-de="Ich vertraue der App nicht mit meinen persönlichen Daten">I don't trust the app with my personal data</span></label>
+        <label class="opt"><input type="checkbox" value="digital_literacy"><span class="t" data-en="I find app-based systems generally difficult" data-de="Ich finde App-basierte Systeme grundsätzlich schwierig">I find app-based systems generally difficult</span></label>
+        <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="Not available at my usual places" data-de="Nicht an meinen üblichen Orten verfügbar">Not available at my usual places</span></label>
+        <label class="opt"><input type="checkbox" value="system_complicated"><span class="t" data-en="The overall system is too complicated" data-de="Das Gesamtsystem ist zu kompliziert">The overall system is too complicated</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_low"><span class="t" data-en="The deposit value is too low to motivate returning" data-de="Der Pfandwert ist zu niedrig, um die Rückgabe zu motivieren">The deposit value is too low to motivate returning</span></label>
+        <label class="opt"><input type="checkbox" value="no_return_points"><span class="t" data-en="Not enough return points near me" data-de="Zu wenige Rückgabestellen in meiner Nähe">Not enough return points near me</span></label>
+        <label class="opt"><input type="checkbox" value="waiting_times"><span class="t" data-en="Waiting times at return points" data-de="Wartezeiten an Rückgabestellen">Waiting times at return points</span></label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"><span class="t" data-en="Nobody around me uses it" data-de="Niemand in meinem Umfeld nutzt es">Nobody around me uses it</span></label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"><span class="t" data-en="I'm not convinced it is better for the environment" data-de="Ich bin nicht überzeugt, dass es besser für die Umwelt ist">I'm not convinced it is better for the environment</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+        <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="vytal-dislikes-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Hygiene &amp; material concerns" data-de="Hygiene &amp; Materialbedenken">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="vytal_dislikes_h" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"><span class="t" data-en="Unsure how well it is cleaned between uses" data-de="Unsicher, wie gründlich es gereinigt wird">Unsure how well it is cleaned between uses</span></label>
+        <label class="opt"><input type="checkbox" value="contamination"><span class="t" data-en="Risk of contamination from previous users" data-de="Risiko einer Kontamination durch Vornutzer">Risk of contamination from previous users</span></label>
+        <label class="opt"><input type="checkbox" value="smell"><span class="t" data-en="Concern about lingering odours or stains" data-de="Bedenken wegen Gerüchen oder Flecken">Concern about lingering odours or stains</span></label>
+        <label class="opt"><input type="checkbox" value="plastics"><span class="t" data-en="Concerns about plastic releasing microplastics" data-de="Bedenken wegen Mikroplastik">Concerns about plastic releasing microplastics</span></label>
+        <label class="opt"><input type="checkbox" value="material"><span class="t" data-en="General uncertainty about container material or safety" data-de="Allgemeine Unsicherheit über das Material">General uncertainty about container material or safety</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_stopped" style="display:none">
+    <div class="section-label t" data-en="Vytal — Why did you stop?" data-de="Vytal — Warum hast du aufgehört?">Vytal — Why did you stop?</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="What specifically made you stop using Vytal? * (select all that apply)" data-de="Was hat dich dazu gebracht, Vytal nicht mehr zu nutzen? * (Mehrfachauswahl möglich)">What specifically made you stop using Vytal? * (select all that apply)</div>
+    <div class="options" data-key="vytal_stopped" data-type="checkbox" data-acc="v" data-req="1">
+      <label class="opt"><input type="checkbox" value="too_complicated"><span class="t" data-en="The process was more complicated than expected" data-de="Der Prozess war komplizierter als erwartet">The process was more complicated than expected</span></label>
+      <label class="opt"><input type="checkbox" value="forgot_habit"><span class="t" data-en="I forgot to make it a habit" data-de="Ich habe vergessen, es zur Gewohnheit zu machen">I forgot to make it a habit</span></label>
+      <label class="opt"><input type="checkbox" value="return_hassle"><span class="t" data-en="Returning the container was too much hassle" data-de="Die Rückgabe war zu umständlich">Returning the container was too much hassle</span></label>
+      <label class="opt"><input type="checkbox" value="not_worth"><span class="t" data-en="It didn't feel worth the effort" data-de="Es hat sich nicht gelohnt">It didn't feel worth the effort</span></label>
+      <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="It stopped being available at my usual place" data-de="Es war nicht mehr an meinen üblichen Orten verfügbar">It stopped being available at my usual place</span></label>
+      <label class="opt"><input type="checkbox" value="hygiene"><span class="t" data-en="I had hygiene or quality concerns after using it" data-de="Ich hatte Hygiene- oder Qualitätsbedenken nach der Nutzung">I had hygiene or quality concerns after using it</span></label>
+      <label class="opt"><input type="checkbox" value="app_issues"><span class="t" data-en="Problems with the app (technical, registration, data)" data-de="Probleme mit der App (technisch, Registrierung, Daten)">Problems with the app (technical, registration, data)</span></label>
+      <label class="opt"><input type="checkbox" value="social_awkward"><span class="t" data-en="I felt uncomfortable or awkward using it" data-de="Ich fühlte mich unwohl dabei, es zu nutzen">I felt uncomfortable or awkward using it</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other reason" data-de="Anderer Grund">Other reason</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_appeals" style="display:none">
+    <div class="section-label t" data-en="Vytal — What would appeal to you" data-de="Vytal — Was dich ansprechen würde">Vytal — What would appeal to you</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="What do you think would appeal to you about Vytal, if you tried it? * (select all that apply)" data-de="Was würde dich an Vytal ansprechen, wenn du es ausprobieren würdest? * (Mehrfachauswahl möglich)">What do you think would appeal to you about Vytal, if you tried it? * (select all that apply)</div>
+    <div class="options" data-key="vytal_appeals" data-type="checkbox" data-acc="v" data-req="1">
+      <label class="opt"><input type="checkbox" value="env"><span class="t" data-en="It would help me reduce single-use waste" data-de="Es würde mir helfen, Einwegmüll zu reduzieren">It would help me reduce single-use waste</span></label>
+      <label class="opt"><input type="checkbox" value="convenient"><span class="t" data-en="It would be easy and convenient to use" data-de="Es wäre einfach und praktisch zu nutzen">It would be easy and convenient to use</span></label>
+      <label class="opt"><input type="checkbox" value="quality"><span class="t" data-en="The container quality looks good" data-de="Die Behälterqualität sieht gut aus">The container quality looks good</span></label>
+      <label class="opt"><input type="checkbox" value="process"><span class="t" data-en="The deposit / return process seems straightforward" data-de="Der Pfand- / Rückgabeprozess wirkt unkompliziert">The deposit / return process seems straightforward</span></label>
+      <label class="opt"><input type="checkbox" value="app"><span class="t" data-en="The app would make the process easy" data-de="Die App würde den Prozess einfach machen">The app would make the process easy</span></label>
+      <label class="opt"><input type="checkbox" value="availability"><span class="t" data-en="It would be available at the places I go to" data-de="Es wäre an meinen üblichen Orten verfügbar">It would be available at the places I go to</span></label>
+      <label class="opt"><input type="checkbox" value="price"><span class="t" data-en="The price seems fair compared to single-use packaging" data-de="Der Preis erscheint fair im Vergleich zu Einwegverpackungen">The price seems fair compared to single-use packaging</span></label>
+      <label class="opt"><input type="checkbox" value="social"><span class="t" data-en="I would feel good using it in front of others" data-de="Ich würde mich gut dabei fühlen, es vor anderen zu nutzen">I would feel good using it in front of others</span></label>
+      <label class="opt"><input type="checkbox" value="nothing"><span class="t" data-en="Nothing would appeal to me" data-de="Nichts würde mich ansprechen">Nothing would appeal to me</span></label>
+      <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="vytal-appeals-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_barriers" style="display:none">
+    <div class="section-label t" data-en="Vytal — What puts you off trying" data-de="Vytal — Was dich vom Ausprobieren abhält">Vytal — What puts you off trying</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="What has put you off trying Vytal so far? * (select all that apply)" data-de="Was hat dich bisher davon abgehalten, Vytal auszuprobieren? * (Mehrfachauswahl möglich)">What has put you off trying Vytal so far? * (select all that apply)</div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Practical" data-de="Praktisch">Practical</span>
+      <div class="options" data-key="vytal_bar_p" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="single_use_easier"><span class="t" data-en="Single-use seems more convenient" data-de="Einweg wirkt praktischer">Single-use seems more convenient</span></label>
+        <label class="opt"><input type="checkbox" value="no_space"><span class="t" data-en="No space in my bag to carry a container" data-de="Kein Platz in meiner Tasche">No space in my bag to carry a container</span></label>
+        <label class="opt"><input type="checkbox" value="deposit_complicated"><span class="t" data-en="The deposit process seems complicated" data-de="Der Pfandprozess erscheint kompliziert">The deposit process seems complicated</span></label>
+        <label class="opt"><input type="checkbox" value="app_install"><span class="t" data-en="Too much effort to install and register in the app" data-de="Zu viel Aufwand für Installation und Registrierung">Too much effort to install and register in the app</span></label>
+        <label class="opt"><input type="checkbox" value="app_difficult"><span class="t" data-en="The app seems hard to use" data-de="Die App erscheint schwer zu bedienen">The app seems hard to use</span></label>
+        <label class="opt"><input type="checkbox" value="data_trust"><span class="t" data-en="I wouldn't trust the app with my personal data" data-de="Ich würde der App meine Daten nicht anvertrauen">I wouldn't trust the app with my personal data</span></label>
+        <label class="opt"><input type="checkbox" value="digital_literacy"><span class="t" data-en="I find app-based systems generally difficult" data-de="Ich finde App-basierte Systeme grundsätzlich schwierig">I find app-based systems generally difficult</span></label>
+        <label class="opt"><input type="checkbox" value="not_available"><span class="t" data-en="Not available at my usual places" data-de="Nicht an meinen üblichen Orten verfügbar">Not available at my usual places</span></label>
+        <label class="opt"><input type="checkbox" value="system_complicated"><span class="t" data-en="The overall system seems too complicated" data-de="Das Gesamtsystem erscheint zu kompliziert">The overall system seems too complicated</span></label>
+        <label class="opt"><input type="checkbox" value="nobody_uses"><span class="t" data-en="Nobody around me uses it" data-de="Niemand in meinem Umfeld nutzt es">Nobody around me uses it</span></label>
+        <label class="opt"><input type="checkbox" value="env_skeptical"><span class="t" data-en="I'm not convinced it is better for the environment" data-de="Ich bin nicht überzeugt, dass es besser für die Umwelt ist">I'm not convinced it is better for the environment</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+        <label class="opt"><input type="checkbox" value="other"><span class="t" data-en="Other:" data-de="Sonstiges:">Other:</span><input type="text" id="vytal-bar-other" class="other-input" data-en-placeholder="Please specify…" data-de-placeholder="Bitte angeben…" placeholder="Please specify…" onclick="event.stopPropagation()"/></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <span class="block-label t" data-en="Hygiene &amp; material concerns" data-de="Hygiene &amp; Materialbedenken">Hygiene &amp; material concerns</span>
+      <div class="options" data-key="vytal_bar_h" data-type="checkbox" data-acc="v" data-req="1">
+        <label class="opt"><input type="checkbox" value="cleanliness"><span class="t" data-en="Unsure how well containers would be cleaned between uses" data-de="Unsicher, wie gründlich Behälter gereinigt werden">Unsure how well containers would be cleaned between uses</span></label>
+        <label class="opt"><input type="checkbox" value="contamination"><span class="t" data-en="Risk of contamination from previous users" data-de="Risiko einer Kontamination durch Vornutzer">Risk of contamination from previous users</span></label>
+        <label class="opt"><input type="checkbox" value="smell"><span class="t" data-en="Concern about lingering odours or stains" data-de="Bedenken wegen Gerüchen oder Flecken">Concern about lingering odours or stains</span></label>
+        <label class="opt"><input type="checkbox" value="plastics"><span class="t" data-en="Concerns about plastic releasing microplastics" data-de="Bedenken wegen Mikroplastik">Concerns about plastic releasing microplastics</span></label>
+        <label class="opt"><input type="checkbox" value="material"><span class="t" data-en="General uncertainty about container material or safety" data-de="Allgemeine Unsicherheit über das Material">General uncertainty about container material or safety</span></label>
+        <label class="opt"><input type="checkbox" value="none"><span class="t" data-en="None of these" data-de="Keine davon">None of these</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_bridge" style="display:none">
+    <div class="section-label t" data-en="Vytal — Bridge question" data-de="Vytal — Schlüsselfrage">Vytal — Bridge question</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="What is or has been the single biggest barrier to using Vytal more? *" data-de="Was ist oder war das größte Hindernis, Vytal mehr zu nutzen? *">What is or has been the single biggest barrier to using Vytal more? *</div>
+    <div class="options" data-key="vytal_top" data-type="radio" data-acc="v" data-req="1">
+      <label class="opt"><input type="radio" name="vytal_top" value="convenience"><span class="t" data-en="Situational convenience — single-use is just easier" data-de="Bequemlichkeit — Einweg ist einfach praktischer">Situational convenience — single-use is just easier</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="infrastructure"><span class="t" data-en="Not enough return points or venues offering it" data-de="Zu wenige Rückgabestellen oder Angebotsstellen">Not enough return points or venues offering it</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="complexity"><span class="t" data-en="The system is too complicated" data-de="Das System ist zu kompliziert">The system is too complicated</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="app"><span class="t" data-en="The app is a barrier (registration, usability, data trust)" data-de="Die App ist ein Hindernis (Registrierung, Bedienbarkeit, Datenschutz)">The app is a barrier (registration, usability, data trust)</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="hygiene"><span class="t" data-en="Hygiene or material concerns" data-de="Hygiene- oder Materialbedenken">Hygiene or material concerns</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="habit"><span class="t" data-en="I keep forgetting / haven't got around to it yet" data-de="Ich vergesse es immer / habe es noch nicht geschafft">I keep forgetting / haven't got around to it yet</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="social"><span class="t" data-en="Social or environmental skepticism" data-de="Soziale oder ökologische Skepsis">Social or environmental skepticism</span></label>
+      <label class="opt"><input type="radio" name="vytal_top" value="no_barrier"><span class="t" data-en="No barrier — I'm happy using it / I'd happily try it" data-de="Kein Hindernis — ich nutze es gerne / würde es gerne ausprobieren">No barrier — I'm happy using it / I'd happily try it</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="vytal_open" style="display:none">
+    <div class="section-label t" data-en="Vytal — Open comment" data-de="Vytal — Offener Kommentar">Vytal — Open comment</div>
+    <div class="badge badge-v">Vytal</div>
+    <div class="q-title t" data-en="Any other thoughts about Vytal you'd like to share?" data-de="Hast du weitere Gedanken zu Vytal, die du teilen möchtest?">Any other thoughts about Vytal you'd like to share?</div>
+    <textarea id="vytal-open" data-en-placeholder="Optional…" data-de-placeholder="Optional…" placeholder="Optional…" rows="4"></textarea>
+  </div>
+
+  <!-- ══ SHARED END ══ -->
+  <div class="step" data-id="motivation" style="display:none">
+    <div class="section-label t" data-en="Motivation" data-de="Motivation">Motivation</div>
+    <div class="q-title t" data-en="How motivated are you to reduce your single-use packaging waste? *" data-de="Wie motiviert bist du, deinen Einwegverpackungsmüll zu reduzieren? *">How motivated are you to reduce your single-use packaging waste? *</div>
+    <div class="q-block">
+      <div class="scale-row" id="mot-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span class="t" data-en="Not at all" data-de="Gar nicht">Not at all</span><span class="t" data-en="Extremely motivated" data-de="Extrem motiviert">Extremely motivated</span></div>
+      <p class="err t" id="mot-err" data-en="Please select a rating before continuing." data-de="Bitte wähle eine Bewertung, bevor du fortfährst.">Please select a rating before continuing.</p>
+    </div>
+    <div class="q-block" style="margin-top:1.5rem">
+      <span class="block-label t" data-en="How likely are you to try or use a reusable container system in the next three months? *" data-de="Wie wahrscheinlich ist es, dass du in den nächsten drei Monaten ein Mehrwegsystem ausprobierst oder nutzt? *">How likely are you to try or use a reusable container system in the next three months? *</span>
+      <div class="scale-row" id="intent-scale" data-req="1">
+        <button class="scale-btn" data-val="1">1</button><button class="scale-btn" data-val="2">2</button>
+        <button class="scale-btn" data-val="3">3</button><button class="scale-btn" data-val="4">4</button>
+        <button class="scale-btn" data-val="5">5</button><button class="scale-btn" data-val="6">6</button>
+        <button class="scale-btn" data-val="7">7</button>
+      </div>
+      <div class="scale-labels"><span class="t" data-en="Very unlikely" data-de="Sehr unwahrscheinlich">Very unlikely</span><span class="t" data-en="Very likely" data-de="Sehr wahrscheinlich">Very likely</span></div>
+      <p class="err t" id="intent-err" data-en="Please select a rating before continuing." data-de="Bitte wähle eine Bewertung, bevor du fortfährst.">Please select a rating before continuing.</p>
+    </div>
+    <div class="q-title t" style="margin-top:1.5rem" data-en="What would most increase your likelihood of using a reusable container system? * (select all that apply)" data-de="Was würde die Wahrscheinlichkeit am meisten erhöhen, dass du ein Mehrwegsystem nutzt? * (Mehrfachauswahl möglich)">What would most increase your likelihood of using a reusable container system? * (select all that apply)</div>
+    <div class="options" data-key="incentives" data-type="checkbox" data-acc="g" data-req="1">
+      <label class="opt"><input type="checkbox" value="discount"><span class="t" data-en="A price discount when using a reusable container" data-de="Ein Preisnachlass bei Nutzung eines Mehrwegbehälters">A price discount when using a reusable container</span></label>
+      <label class="opt"><input type="checkbox" value="tax"><span class="t" data-en="A tax or surcharge on single-use packaging making it more expensive" data-de="Eine Steuer oder ein Aufschlag auf Einwegverpackungen">A tax or surcharge on single-use packaging making it more expensive</span></label>
+      <label class="opt"><input type="checkbox" value="wider"><span class="t" data-en="More places accepting or offering it" data-de="Mehr Orte, die es anbieten oder akzeptieren">More places accepting or offering it</span></label>
+      <label class="opt"><input type="checkbox" value="simpler"><span class="t" data-en="A simpler or faster return process" data-de="Ein einfacherer oder schnellerer Rückgabeprozess">A simpler or faster return process</span></label>
+      <label class="opt"><input type="checkbox" value="reminders"><span class="t" data-en="Reminders or a mobile app to help me remember" data-de="Erinnerungen oder eine App, die mir hilft, daran zu denken">Reminders or a mobile app to help me remember</span></label>
+      <label class="opt"><input type="checkbox" value="social"><span class="t" data-en="Knowing friends or colleagues use it" data-de="Zu wissen, dass Freunde oder Kollegen es nutzen">Knowing friends or colleagues use it</span></label>
+      <label class="opt"><input type="checkbox" value="nothing"><span class="t" data-en="Nothing — I am not interested" data-de="Nichts — ich bin nicht interessiert">Nothing — I am not interested</span></label>
+    </div>
+  </div>
+
+  <div class="step" data-id="open" style="display:none">
+    <div class="section-label t" data-en="Open feedback" data-de="Offenes Feedback">Open feedback</div>
+    <div class="q-title t" data-en="Is there anything else that would make reusable container systems easier or more appealing?" data-de="Gibt es sonst etwas, das Mehrwegsysteme einfacher oder attraktiver machen würde?">Is there anything else that would make reusable container systems easier or more appealing?</div>
+    <textarea id="open1" data-en-placeholder="Your thoughts (optional)…" data-de-placeholder="Deine Gedanken (optional)…" placeholder="Your thoughts (optional)…" rows="4"></textarea>
+    <div class="q-title t" style="margin-top:1.5rem" data-en="Any final comments or suggestions?" data-de="Gibt es abschließende Kommentare oder Vorschläge?">Any final comments or suggestions?</div>
+    <textarea id="open2" data-en-placeholder="Optional…" data-de-placeholder="Optional…" placeholder="Optional…" rows="3"></textarea>
+  </div>
+
+  </div><!-- /steps -->
+
+  <div class="nav" id="nav-bar" style="display:none">
+    <button class="btn t" id="back-btn" onclick="go(-1)" style="visibility:hidden" data-en="Back" data-de="Zurück">Back</button>
+    <span class="step-count" id="step-count"></span>
+    <button class="btn primary t" id="next-btn" onclick="go(1)" data-en="Next" data-de="Weiter">Next</button>
+  </div>
+  <p id="submit-err" style="display:none;font-size:13px;color:#A32D2D;margin-top:.75rem;text-align:center;" class="t" data-en="Something went wrong — please check your connection and try again." data-de="Etwas ist schiefgelaufen — bitte überprüfe deine Verbindung und versuche es erneut.">Something went wrong — please check your connection and try again.</p>
+
+  <div id="thank-you" style="display:none">
+    <div class="thank-you">
+      <div class="check-circle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2 class="t" data-en="Thank you for your responses!" data-de="Vielen Dank für deine Antworten!">Thank you for your responses!</h2>
+      <p class="t" data-en="Your input helps improve reuse container systems for everyone." data-de="Dein Beitrag hilft, Mehrwegsysteme für alle zu verbessern.">Your input helps improve reuse container systems for everyone.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── LANGUAGE ─────────────────────────────────────────────────────
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  ans['response_language'] = l; // record language in data
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-de').classList.toggle('active', l === 'de');
+  // Swap all .t elements
+  document.querySelectorAll('.t').forEach(el => {
+    const txt = el.dataset[l];
+    if (txt !== undefined) el.textContent = txt;
+  });
+  // Swap placeholders
+  document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+    el.placeholder = el.dataset[l + 'Placeholder'] || el.placeholder;
+  });
+  // Swap nav buttons text explicitly (they have value text too)
+  const back = document.getElementById('back-btn');
+  const next = document.getElementById('next-btn');
+  if (back) back.textContent = l === 'de' ? 'Zurück' : 'Back';
+  if (next) {
+    const isLast = idx === seq.length - 1;
+    next.textContent = isLast ? (l === 'de' ? 'Absenden' : 'Submit') : (l === 'de' ? 'Weiter' : 'Next');
+  }
+}
+
+function startWithLang(l) {
+  document.getElementById('lang-screen').style.display = 'none';
+  document.getElementById('logo').style.display = 'block';
+  document.getElementById('progress-bar').style.display = 'block';
+  document.getElementById('steps').style.display = 'block';
+  document.getElementById('nav-bar').style.display = 'flex';
+  document.getElementById('lang-toggle').style.display = 'flex';
+  setLang(l);
+  showStep(0);
+}
+
+// ── FORMSPREE ─────────────────────────────────────────────────────
+const FORMSPREE_URL = 'https://formspree.io/f/mojblejd';
+
+async function submitToFormspree() {
+  ans['open_feedback_1'] = (document.getElementById('open1')?.value || '').trim();
+  ans['open_feedback_2'] = (document.getElementById('open2')?.value || '').trim();
+  ans['recup_open_text'] = (document.getElementById('recup-open')?.value || '').trim();
+  ans['vytal_open_text'] = (document.getElementById('vytal-open')?.value || '').trim();
+  ans['neither_open_text'] = (document.getElementById('neither-open')?.value || '').trim();
+  const payload = {};
+  for (const [k, v] of Object.entries(ans)) {
+    payload[k] = Array.isArray(v) ? v.join(', ') : (v ?? '');
+  }
+  const btn = document.getElementById('next-btn');
+  btn.textContent = lang === 'de' ? 'Wird gesendet…' : 'Sending…';
+  btn.disabled = true;
+  try {
+    const res = await fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      document.getElementById('steps').style.display = 'none';
+      document.getElementById('nav-bar').style.display = 'none';
+      document.getElementById('thank-you').style.display = 'block';
+      setLang(lang); // translate thank-you screen
+    } else {
+      btn.textContent = lang === 'de' ? 'Absenden' : 'Submit';
+      btn.disabled = false;
+      document.getElementById('submit-err').style.display = 'block';
+    }
+  } catch {
+    btn.textContent = lang === 'de' ? 'Absenden' : 'Submit';
+    btn.disabled = false;
+    document.getElementById('submit-err').style.display = 'block';
+  }
+}
+
+// ── SEQUENCE ──────────────────────────────────────────────────────
+const ans = {};
+const BASE = ['demographics','habits','awareness'];
+const END  = ['motivation','open'];
+const SCALES = {
+  'recup-ease-scale':'recup_ease',
+  'vytal-ease-scale':'vytal_ease',
+  'intent-scale':'adoption_intent',
+  'mot-scale':'motivation'
+};
+const SCALE_ERRS = {
+  'recup-ease-scale':'recup-ease-err',
+  'vytal-ease-scale':'vytal-ease-err',
+  'intent-scale':'intent-err',
+  'mot-scale':'mot-err'
+};
+
+function sysSteps(s) {
+  const u = ans[s+'_usage'];
+  const steps = [s+'_usage'];
+  if (u === 'regular' || u === 'occasional' || u === 'stopped') {
+    steps.push(s+'_ease', s+'_likes', s+'_dislikes');
+    if (u === 'stopped') steps.push(s+'_stopped');
+  } else if (u === 'never') {
+    steps.push(s+'_appeals', s+'_barriers');
+  }
+  steps.push(s+'_bridge', s+'_open');
+  return steps;
+}
+
+function buildSeq() {
+  const aw = ans['awareness'];
+  let seq = [...BASE];
+  if      (aw === 'recup_only') seq = seq.concat(sysSteps('recup'));
+  else if (aw === 'vytal_only') seq = seq.concat(sysSteps('vytal'));
+  else if (aw === 'both')       seq = seq.concat(sysSteps('recup'), sysSteps('vytal'));
+  else if (aw === 'neither')    seq = seq.concat(['neither_appeals','neither_barriers','neither_bridge','neither_open']);
+  return seq.concat(END);
+}
+
+let seq = buildSeq(), idx = 0;
+
+function showStep(i) {
+  document.querySelectorAll('.step').forEach(s => s.style.display = 'none');
+  const stepId = seq[i];
+  const el = document.querySelector(`.step[data-id="${stepId}"]`);
+  if (el) el.style.display = 'block';
+  // Transition note for Both respondents
+  const note = document.getElementById('vytal-transition-note');
+  if (note) note.style.display = (stepId === 'vytal_usage' && ans['awareness'] === 'both') ? 'block' : 'none';
+  const pct = Math.round((i+1)/(seq.length+1)*100);
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('step-count').textContent = (i+1) + ' / ' + seq.length;
+  document.getElementById('back-btn').style.visibility = i > 0 ? 'visible' : 'hidden';
+  const isLast = i === seq.length - 1;
+  document.getElementById('next-btn').textContent = isLast
+    ? (lang === 'de' ? 'Absenden' : 'Submit')
+    : (lang === 'de' ? 'Weiter' : 'Next');
+  // Re-apply language to newly shown step
+  setLang(lang);
+}
+
+function validate() {
+  const stepId = seq[idx];
+  const el = document.querySelector(`.step[data-id="${stepId}"]`);
+  let ok = true;
+  if (stepId === 'demographics') {
+    const v = (ans['city']||'').trim();
+    const e = document.getElementById('city-err');
+    if (!v) { e.classList.add('on'); ok = false; } else e.classList.remove('on');
+  }
+  el.querySelectorAll('.options[data-req="1"]').forEach(g => {
+    const key = g.dataset.key, type = g.dataset.type;
+    const filled = type === 'radio' ? ans[key] != null : (ans[key] && ans[key].length > 0);
+    if (!filled) {
+      g.classList.add('inv');
+      let e = g.nextElementSibling;
+      if (!e || !e.classList.contains('err')) {
+        e = document.createElement('p'); e.className = 'err';
+        e.textContent = type === 'radio'
+          ? (lang === 'de' ? 'Bitte wähle eine Option, bevor du fortfährst.' : 'Please select an option before continuing.')
+          : (lang === 'de' ? 'Bitte wähle mindestens eine Option.' : 'Please select at least one option before continuing.');
+        g.insertAdjacentElement('afterend', e);
+      }
+      e.classList.add('on'); ok = false;
+    } else {
+      g.classList.remove('inv');
+      const e = g.nextElementSibling;
+      if (e && e.classList.contains('err')) e.classList.remove('on');
+    }
+  });
+  el.querySelectorAll('.scale-row[data-req="1"]').forEach(sc => {
+    const key = SCALES[sc.id], filled = key && ans[key] != null;
+    if (!filled) {
+      sc.classList.add('inv');
+      const e = document.getElementById(SCALE_ERRS[sc.id]);
+      if (e) e.classList.add('on'); ok = false;
+    } else {
+      sc.classList.remove('inv');
+      const e = document.getElementById(SCALE_ERRS[sc.id]);
+      if (e) e.classList.remove('on');
+    }
+  });
+  return ok;
+}
+
+function go(dir) {
+  if (dir === 1 && !validate()) return;
+  const stepId = seq[idx];
+  if (dir === 1 && (stepId === 'awareness' || stepId === 'recup_usage' || stepId === 'vytal_usage')) {
+    seq = buildSeq();
+  }
+  idx += dir;
+  if (idx >= seq.length) { submitToFormspree(); return; }
+  if (idx < 0) idx = 0;
+  showStep(idx);
+}
+
+// ── OPTION INTERACTION ────────────────────────────────────────────
+document.querySelectorAll('.options').forEach(g => {
+  const type = g.dataset.type, key = g.dataset.key, acc = g.dataset.acc||'g';
+  if (!key) return;
+  const cls = acc==='r'?'sel-r':acc==='v'?'sel-v':'sel';
+  g.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', e => {
+      if (e.target.tagName==='INPUT' && e.target.type==='text') return;
+      if (type==='radio') {
+        g.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel','sel-r','sel-v'));
+        opt.classList.add(cls);
+        const inp=opt.querySelector('input[type=radio]');
+        if (inp){inp.checked=true;ans[key]=inp.value;}
+      } else {
+        opt.classList.toggle(cls);
+        const inp=opt.querySelector('input[type=checkbox]');
+        if (inp) inp.checked=opt.classList.contains(cls);
+        if (!ans[key]) ans[key]=[];
+        const val=inp?inp.value:null;
+        if (opt.classList.contains(cls)){if(!ans[key].includes(val))ans[key].push(val);}
+        else ans[key]=ans[key].filter(v=>v!==val);
+      }
+    });
+  });
+});
+
+// ── SCALE BUTTONS ─────────────────────────────────────────────────
+document.querySelectorAll('.scale-row').forEach(row=>{
+  const key=SCALES[row.id]; if(!key) return;
+  row.querySelectorAll('.scale-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      row.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel'); ans[key]=btn.dataset.val;
+    });
+  });
+});
+
+// ── TEXT INPUTS ───────────────────────────────────────────────────
+document.getElementById('city-input').addEventListener('input',function(){ans['city']=this.value.trim();});
+[
+  ['awareness-other',       'awareness_other'],
+  ['recup-likes-other',     'recup_likes_other'],
+  ['recup-dislikes-other',  'recup_dislikes_other'],
+  ['recup-appeals-other',   'recup_appeals_other'],
+  ['recup-bar-other',       'recup_bar_other'],
+  ['vytal-likes-other',     'vytal_likes_other'],
+  ['vytal-dislikes-other',  'vytal_dislikes_other'],
+  ['vytal-appeals-other',   'vytal_appeals_other'],
+  ['vytal-bar-other',       'vytal_bar_other'],
+  ['neither-appeals-other', 'neither_appeals_other'],
+  ['neither-bar-other',     'neither_bar_other'],
+].forEach(([id,key])=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',function(){ans[key]=this.value.trim();});
+});
+</script>
+</body>
+</html>
