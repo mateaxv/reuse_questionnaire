@@ -76,6 +76,14 @@
   <div id="lang-screen">
     <h1>🌍</h1>
     <p>Please choose your language / Bitte wähle deine Sprache</p>
+    <div style="background:#f5f5f3;border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;text-align:left">
+      <p style="font-size:14px;color:#1a1a1a;line-height:1.6;margin-bottom:.75rem">
+        This questionnaire is part of a master's thesis investigating why people use — or don't use — reusable container systems such as ReCup and Vytal. It is addressed to people living in Germany. Your responses are anonymous and will only be used for academic research. It takes approximately 5–8 minutes to complete.
+      </p>
+      <p style="font-size:14px;color:#1a1a1a;line-height:1.6">
+        Dieser Fragebogen ist Teil einer Masterarbeit, die untersucht, warum Menschen Mehrwegsysteme wie ReCup und Vytal nutzen — oder nicht nutzen. Er richtet sich an Personen, die in Deutschland leben. Deine Antworten sind anonym und werden ausschließlich für wissenschaftliche Zwecke verwendet. Das Ausfüllen dauert ca. 5–8 Minuten.
+      </p>
+    </div>
     <button class="lang-choice-btn" onclick="startWithLang('en')">🇬🇧 &nbsp;English</button>
     <button class="lang-choice-btn" onclick="startWithLang('de')">🇩🇪 &nbsp;Deutsch</button>
   </div>
@@ -134,10 +142,11 @@
       <span class="block-label t" data-en="What is your current employment status? *" data-de="Was ist dein aktueller Beschäftigungsstatus? *">What is your current employment status? *</span>
       <div class="options" data-key="employment" data-type="radio" data-acc="g" data-req="1">
         <label class="opt"><input type="radio" name="employment" value="student"><span class="t" data-en="Student (full-time)" data-de="Student/in (Vollzeit)">Student (full-time)</span></label>
+        <label class="opt"><input type="radio" name="employment" value="student_working"><span class="t" data-en="Student and working part-time" data-de="Student/in und nebenbei arbeitend">Student and working part-time</span></label>
+        <label class="opt"><input type="radio" name="employment" value="apprenticeship"><span class="t" data-en="Apprenticeship / vocational training (in progress)" data-de="Ausbildung (laufend)">Apprenticeship / vocational training (in progress)</span></label>
         <label class="opt"><input type="radio" name="employment" value="employed_full"><span class="t" data-en="Employed full-time" data-de="Angestellt (Vollzeit)">Employed full-time</span></label>
         <label class="opt"><input type="radio" name="employment" value="employed_part"><span class="t" data-en="Employed part-time" data-de="Angestellt (Teilzeit)">Employed part-time</span></label>
         <label class="opt"><input type="radio" name="employment" value="self_employed"><span class="t" data-en="Self-employed / freelance" data-de="Selbstständig / freiberuflich">Self-employed / freelance</span></label>
-        <label class="opt"><input type="radio" name="employment" value="student_working"><span class="t" data-en="Student and working part-time" data-de="Student/in und nebenbei arbeitend">Student and working part-time</span></label>
         <label class="opt"><input type="radio" name="employment" value="unemployed"><span class="t" data-en="Currently not employed" data-de="Derzeit nicht erwerbstätig">Currently not employed</span></label>
         <label class="opt"><input type="radio" name="employment" value="retired"><span class="t" data-en="Retired" data-de="Rentner/in">Retired</span></label>
         <label class="opt"><input type="radio" name="employment" value="prefer_not"><span class="t" data-en="Prefer not to say" data-de="Keine Angabe">Prefer not to say</span></label>
