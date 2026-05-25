@@ -740,7 +740,6 @@ function startWithLang(l) {
 }
 
 // ── GOOGLE APPS SCRIPT ENDPOINT ──────────────────────────────────
-// Replace with your deployed web app URL
 const FORMSPREE_URL = 'https://script.google.com/macros/s/AKfycbyvGyqFjN2oNgVSbxLJN0Lb3YtXakXdyeSHV2GWOJ74XdHfUf2gQ7MM2ROC58A6U3Ubow/exec';
 
 async function submitToFormspree() {
@@ -759,43 +758,23 @@ async function submitToFormspree() {
   btn.textContent = lang === 'de' ? 'Wird gesendet…' : 'Sending…';
   btn.disabled = true;
 
-  // Google Apps Script doesn't support CORS from external pages.
-  // We submit via a hidden iframe to avoid the browser blocking the request.
   try {
-    let iframe = document.getElementById('hidden-submit-frame');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.name = 'hidden-submit-frame';
-      iframe.id = 'hidden-submit-frame';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-    }
+    // Use URLSearchParams so Apps Script receives it as form data
+    const body = new URLSearchParams();
+    body.append('payload', JSON.stringify(payload));
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = FORMSPREE_URL;
-    form.target = 'hidden-submit-frame';
-    form.style.display = 'none';
+    // no-cors means we can't read the response, but the request goes through
+    await fetch(FORMSPREE_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: body,
+    });
 
-    // Send entire payload as a single JSON string field
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'payload';
-    input.value = JSON.stringify(payload);
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    // We can't read the iframe response due to cross-origin restrictions,
-    // so we wait briefly then show the thank-you screen regardless.
-    setTimeout(() => {
-      document.getElementById('steps').style.display = 'none';
-      document.getElementById('nav-bar').style.display = 'none';
-      document.getElementById('thank-you').style.display = 'block';
-      setLang(lang);
-    }, 1500);
+    // Since no-cors gives us an opaque response, we assume success
+    document.getElementById('steps').style.display = 'none';
+    document.getElementById('nav-bar').style.display = 'none';
+    document.getElementById('thank-you').style.display = 'block';
+    setLang(lang);
 
   } catch (err) {
     btn.textContent = lang === 'de' ? 'Absenden' : 'Submit';
