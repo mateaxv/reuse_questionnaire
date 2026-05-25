@@ -739,7 +739,8 @@ function startWithLang(l) {
   showStep(0);
 }
 
-// ── GOOGLE APPS SCRIPT ENDPOINT ──────────────────────────────────
+// ── SHEETDB ENDPOINT ─────────────────────────────────────────────
+// Replace with your SheetDB API URL from sheetdb.io
 const FORMSPREE_URL = 'https://sheetdb.io/api/v1/e4ocyftsptxda';
 
 async function submitToFormspree() {
@@ -753,29 +754,27 @@ async function submitToFormspree() {
   for (const [k, v] of Object.entries(ans)) {
     payload[k] = Array.isArray(v) ? v.join(', ') : (v ?? '');
   }
+  payload['submitted_at'] = new Date().toISOString();
 
   const btn = document.getElementById('next-btn');
   btn.textContent = lang === 'de' ? 'Wird gesendet…' : 'Sending…';
   btn.disabled = true;
 
   try {
-    // Use URLSearchParams so Apps Script receives it as form data
-    const body = new URLSearchParams();
-    body.append('payload', JSON.stringify(payload));
-
-    // no-cors means we can't read the response, but the request goes through
-    await fetch(FORMSPREE_URL, {
+    const res = await fetch(FORMSPREE_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      body: body,
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ data: payload }),
     });
 
-    // Since no-cors gives us an opaque response, we assume success
-    document.getElementById('steps').style.display = 'none';
-    document.getElementById('nav-bar').style.display = 'none';
-    document.getElementById('thank-you').style.display = 'block';
-    setLang(lang);
-
+    if (res.ok) {
+      document.getElementById('steps').style.display = 'none';
+      document.getElementById('nav-bar').style.display = 'none';
+      document.getElementById('thank-you').style.display = 'block';
+      setLang(lang);
+    } else {
+      throw new Error('Response not ok: ' + res.status);
+    }
   } catch (err) {
     btn.textContent = lang === 'de' ? 'Absenden' : 'Submit';
     btn.disabled = false;
