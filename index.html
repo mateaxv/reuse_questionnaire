@@ -739,8 +739,9 @@ function startWithLang(l) {
   showStep(0);
 }
 
-// ── FORMSPREE ─────────────────────────────────────────────────────
-const FORMSPREE_URL = 'https://script.google.com/macros/s/AKfycbzxy-abKZ06VWuBzIpi3ZD0Q51eEaC6UVl_TwMnn-lfa_MY8L5lKMl2a8-aV4q5p0gqwg/exec';
+// ── GOOGLE APPS SCRIPT ENDPOINT ──────────────────────────────────
+// Replace with your deployed web app URL
+const FORMSPREE_URL = 'https://script.google.com/https://script.google.com/macros/s/AKfycbyQXDX2Um9nl-CDMIS3uhn0Jm2cY3hkHsjKBdpc35wxCKHRCtxW6gAeVQ_PoCPVoe89ug/execmacros/s/YOUR_SCRIPT_ID/exec';
 
 async function submitToFormspree() {
   ans['open_feedback_1'] = (document.getElementById('open1')?.value || '').trim();
@@ -748,30 +749,55 @@ async function submitToFormspree() {
   ans['recup_open_text'] = (document.getElementById('recup-open')?.value || '').trim();
   ans['vytal_open_text'] = (document.getElementById('vytal-open')?.value || '').trim();
   ans['neither_open_text'] = (document.getElementById('neither-open')?.value || '').trim();
+
   const payload = {};
   for (const [k, v] of Object.entries(ans)) {
     payload[k] = Array.isArray(v) ? v.join(', ') : (v ?? '');
   }
+
   const btn = document.getElementById('next-btn');
   btn.textContent = lang === 'de' ? 'Wird gesendet…' : 'Sending…';
   btn.disabled = true;
+
+  // Google Apps Script doesn't support CORS from external pages.
+  // We submit via a hidden iframe to avoid the browser blocking the request.
   try {
-    const res = await fetch(FORMSPREE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
+    let iframe = document.getElementById('hidden-submit-frame');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.name = 'hidden-submit-frame';
+      iframe.id = 'hidden-submit-frame';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = FORMSPREE_URL;
+    form.target = 'hidden-submit-frame';
+    form.style.display = 'none';
+
+    // Send entire payload as a single JSON string field
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    // We can't read the iframe response due to cross-origin restrictions,
+    // so we wait briefly then show the thank-you screen regardless.
+    setTimeout(() => {
       document.getElementById('steps').style.display = 'none';
       document.getElementById('nav-bar').style.display = 'none';
       document.getElementById('thank-you').style.display = 'block';
-      setLang(lang); // translate thank-you screen
-    } else {
-      btn.textContent = lang === 'de' ? 'Absenden' : 'Submit';
-      btn.disabled = false;
-      document.getElementById('submit-err').style.display = 'block';
-    }
-  } catch {
+      setLang(lang);
+    }, 1500);
+
+  } catch (err) {
     btn.textContent = lang === 'de' ? 'Absenden' : 'Submit';
     btn.disabled = false;
     document.getElementById('submit-err').style.display = 'block';
